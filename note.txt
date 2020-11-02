@@ -1,0 +1,3 @@
+User Agent,Canvas Values,Permissions,WebGL Info,Screen,Mr,SSH,Fas,fmh, bd string, rCFP, Mouse Movements
+
+^ for collection.js data bascially collect data
