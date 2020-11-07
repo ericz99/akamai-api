@@ -1,3 +1,27 @@
 User Agent,Canvas Values,Permissions,WebGL Info,Screen,Mr,SSH,Fas,fmh, bd string, rCFP, Mouse Movements
 
 ^ for collection.js data bascially collect data
+
+- [x] useragent
+- [x] canvas Values
+- [x] Permissions - skip
+- [x] webgl info - skip
+- [x] screen sizes - we need
+- [x] getmr performances - we need
+- [x] ssh - we need
+- [x] fas - we need
+- [x] fmh - we need
+- [x] bd string aka the window - same thing
+- [x] rCFP basically the canvas Values
+- [x] mact mouse movements
+
+---------------------------------------------
+
+looking at the things, each sites load differently,
+so they gonna have differnent dmact, doact
+
+- MUST IMPROVE
+dmact, - done
+doact, - done
+me_vel
+dme_vel, - done maybe? go over it again

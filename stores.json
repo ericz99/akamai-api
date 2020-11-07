@@ -1,6 +1,26 @@
 [  
   {
-    "footlocker": {
+    "dicks": {
+      "ver": "1.66",
+      "url": "https://www.dickssportinggoods.com/",
+      "host": "www.dickssportinggoods.com",
+      "informinfo": "0,-1,0,0,1429,630,0;0,-1,0,0,1758,1758,0;",
+      "headers": {
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "en-US,en;q=0.9",
+        "dnt": "1",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-site": "none",
+        "sec-fetch-user": "?1",
+        "upgrade-insecure-requests": "1",
+        "Host": "www.dickssportinggoods.com",
+        "Connection": "keep-alive"
+      }
+    }
+  },
+  {
+    "finishline": {
       "ver": "1.66",
       "url": "https://www.finishline.com/",
       "host": "www.finishline.com",
@@ -15,6 +35,48 @@
         "sec-fetch-user": "?1",
         "upgrade-insecure-requests": "1",
         "Host": "www.finishline.com",
+        "Connection": "keep-alive",
+        "Cache-Control": "no-cache"
+      }
+    }
+  },
+  {
+    "yeezysupply": {
+      "ver": "1.66",
+      "url": "https://www.yeezysupply.com/",
+      "host": "www.yeezysupply.com",
+      "informinfo": "",
+      "headers": {
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "en-US,en;q=0.9",
+        "dnt": "1",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-site": "none",
+        "sec-fetch-user": "?1",
+        "upgrade-insecure-requests": "1",
+        "Host": "www.yeezysupply.com",
+        "Connection": "keep-alive",
+        "Cache-Control": "no-cache"
+      }
+    }
+  },
+  {
+    "jdsports": {
+      "ver": "1.66",
+      "url": "https://www.jdsports.com/",
+      "host": "www.jdsports.com",
+      "informinfo": "0,0,0,0,1802,310,0;0,0,0,0,2402,310,0;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,0;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,0;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,0;0,-1,0,0,-1,-1,1;0,-1,0,0,-1,-1,0;0,-1,0,0,-1,-1,1;0,-1,0,0,1143,520,0;0,-1,0,0,-1,520,0;",
+      "headers": {
+        "accept": "*/*",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "en-US,en;q=0.9",
+        "dnt": "1",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-site": "none",
+        "sec-fetch-user": "?1",
+        "upgrade-insecure-requests": "1",
+        "Host": "www.jdsports.com",
         "Connection": "keep-alive",
         "Cache-Control": "no-cache"
       }
