@@ -21,7 +21,10 @@ looking at the things, each sites load differently,
 so they gonna have differnent dmact, doact
 
 - MUST IMPROVE
-dmact, - done
-doact, - done
+dmact,
+doact, -
 me_vel
-dme_vel, - done maybe? go over it again
+dme_vel, 
+
+the cookie that i get from GET request, is much shorter, than the browser
+ideally, what i believe is that you may need tls to get the actual length cookie

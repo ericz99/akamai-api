@@ -1,12 +1,77 @@
 const fs = require("fs");
 const lodash = require("lodash");
 const request = require("request-promise");
-const initMyTLS = require("mytls");
+const { promisify } = require("util");
+const got = require("got");
+const { CookieJar } = require("tough-cookie");
+const tunnel = require("tunnel");
+const UserAgent = require("user-agents");
 
 const genBrowserData = require("./genBrowserData");
 const siteOptions = require("./stores.json");
 const canvasArray = require("./canvas.json");
+const mrArray = require("./mrstring.json");
 const events = require("./events");
+
+const userAgent = new UserAgent(/Chrome/, {
+  deviceCategory: "desktop",
+});
+
+/**
+ *
+ * @param {*} site
+ * @param {*} proxy
+ */
+async function getScript(selectedSite, usedUserAgent, cookieJar, proxy) {
+  // # make request
+  const resp = await got(selectedSite.url, {
+    method: "GET",
+    http2: true,
+    headers: {
+      accept: "*/*",
+      "accept-encoding": "gzip, deflate, br",
+      "accept-language": "en-US,en;q=0.9",
+      origin: "https://www.finishline.com/",
+      referer: "https://www.finishline.com/",
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      "user-agent": usedUserAgent,
+    },
+    agent: !proxy
+      ? null
+      : {
+          https: tunnel.httpsOverHttp({
+            proxy: {
+              host: "proxy.packetstream.io",
+              port: "31112",
+              proxyAuth: "ericz123:eb08eB4QEp2lprWE_country-UnitedStates",
+            },
+          }),
+        },
+    cookieJar,
+  });
+
+  let p = /src="\/(static|assets|api|resources|public)\/(\w+)/gm.exec(
+    resp.body
+  );
+
+  let cookie = resp.headers["set-cookie"]
+    .toString()
+    .split("_abck=")[1]
+    .split("; Domain")[0];
+
+  let bm_sz = resp.headers["set-cookie"]
+    .toString()
+    .split("bm_sz=")[1]
+    .split("; Domain")[0];
+
+  return {
+    post_url: `${p[1]}/${p[2]}`,
+    cookie,
+    bm_sz,
+  };
+}
 
 /**
  *
@@ -17,41 +82,34 @@ const events = require("./events");
 async function startSensorGen(site, proxy) {
   try {
     const browserData = genBrowserData();
-    const cookieJar = new request.jar();
-    const usedUserAgent = browserData.userAgent;
+    const cookieJar = new CookieJar();
+    const usedUserAgent = userAgent.toString().replace(/\|"/g, "");
     const ua_browser = getUaBrowser(usedUserAgent);
     const selectedSite = siteOptions.find((s) => s[site] && s)[site];
 
-    // # make request
-    const resp = await request({
-      method: "GET",
-      uri: selectedSite.url,
-      headers: {
-        ...selectedSite.headers,
-        "user-agent": usedUserAgent,
-      },
-      proxy: proxy !== null ? `http://${proxy}` : null,
-      timeout: 2000,
-      resolveWithFullResponse: true,
-      jar: cookieJar,
-      gzip: true,
-      simple: false,
-    });
+    // // # grab cookie from browser - temp solution
+    // const { body } = await got(
+    //   `http://localhost:5000?site=${selectedSite.url}`,
+    //   {
+    //     method: "GET",
+    //     responseType: "json",
+    //   }
+    // );
 
-    let p = /src="\/(static|assets|api|resources|public)\/(\w+)/gm.exec(
-      resp.body
+    // # get script
+    const { post_url, cookie, bm_sz } = await getScript(
+      selectedSite,
+      usedUserAgent,
+      cookieJar,
+      proxy
     );
-    let post_url = `${p[1]}/${p[2]}`;
-    let abck = resp.headers["set-cookie"]
-      .toString()
-      .split("_abck=")[1]
-      .split("; Domain")[0];
 
     // # generate sensor data
     return generateSensorData(
       site,
       browserData,
-      abck,
+      cookie,
+      bm_sz,
       cookieJar,
       ua_browser,
       usedUserAgent,
@@ -76,6 +134,7 @@ async function generateSensorData(
   site,
   browserData,
   cookie,
+  bm_sz,
   cookieJar,
   ua_browser,
   usedUserAgent,
@@ -83,7 +142,11 @@ async function generateSensorData(
   selectedSite,
   post_url
 ) {
-  let startTS = get_cf_date(true) - lodash.random(100, 1000);
+  let startTS = 0;
+
+  if (site == "finishline") {
+    startTS = get_cf_date(true) - lodash.random(300, 900);
+  }
 
   let bmak = {
     ver: 1.66,
@@ -121,12 +184,12 @@ async function generateSensorData(
     init_time: 0,
     d2: 0,
     ke_cnt: 0,
-    pe_cnt: lodash.random(2, 10),
+    pe_cnt: 0,
     te_cnt: 0,
     api_public_key: "afSbep8yjnZUjq3aL010jO15Sawj2VZfdYK8uY90uxq",
     cs: "0a46G5m17Vrp4o4c",
-    aj_indx: 3, // same thing
-    aj_type: 1, // event type depend on certain event
+    aj_indx: 1, // same thing
+    aj_type: 9, // event type depend on certain event
     mr: "-1",
     o9: 0,
     fmh: browserData.fmh, // probably different from every browser && screen size,
@@ -143,22 +206,27 @@ async function generateSensorData(
     vcact: "",
   };
 
+  let rand = lodash.random(200, 400);
   let fpValstr = data(ua_browser, browserData).replace(/"/g, '"') + ";-1";
   let p = ab(fpValstr);
   let yy = Math.floor(1e3 * Math.random()).toString();
   let zz = canvasArray.canvas[yy].toString();
+  let mrRand = mrArray.mr[Math.floor(4000 * Math.random())].toString();
+
   bmak.tst = get_cf_date() - (get_cf_date() - lodash.random(3, 9));
 
   // # get doact
-  var doact = events[site].cdoa(bmak);
+  var doact = events[site].cdoa(bmak, updatet(bmak), rand);
   // # get dmact
-  var dmact = events[site].cdma(bmak);
+  var dmact = events[site].cdma(bmak, updatet(bmak), rand);
   // # get vcact only for certain site
-  events[site].lvc(bmak);
+  events[site].lvc(bmak, updatet(bmak));
+  // # get the jrs(start_ts)
+  const ss = jrs(bmak.start_ts);
   // # execute certain function first
   to(bmak);
 
-  console.log(bmak.vcact);
+  console.log(ss);
 
   // # our sensor data
   let sensor_data =
@@ -219,12 +287,12 @@ async function generateSensorData(
       bmak.n_ck, // 20
       cookie, // 21 // get cookie which is our abck cookie
       ab(cookie), // 22
-      browserData.canvas.rVal, // 23 fpcf.rVal == the index of our canvas position
-      browserData.canvas.rCFP, // 24 rpcf.rCFP our actual canvas || get random canvas
+      yy, // 23 fpcf.rVal == the index of our canvas position
+      zz, // 24 rpcf.rCFP our actual canvas || get random canvas
       browserData.fas, // 25 bmak.fas()
       ff(80) + ff(105) + ff(90) + ff(116) + ff(69), // 26 == PiZte
-      jrs(bmak.start_ts)[0], // 27
-      jrs(bmak.start_ts)[1], // 28
+      ss[0], // 27
+      ss[1], // 28
     ].join(",") +
     "-1,2,-94,-106," +
     bmak.aj_type + // aj_type is the  type of event for example; 6 is something to do with mouse
@@ -235,7 +303,7 @@ async function generateSensorData(
   sensor_data =
     sensor_data +
     "-1,2,-94,-119," +
-    browserData.mr +
+    mrRand +
     "-1,2,-94,-122," +
     sed() +
     "-1,2,-94,-123," +
@@ -280,6 +348,7 @@ async function generateSensorData(
   return genCookie(
     gen_key(sensor_data, bmak),
     cookie,
+    bm_sz,
     cookieJar,
     usedUserAgent,
     proxy,
@@ -291,6 +360,7 @@ async function generateSensorData(
 function genCookie(
   sensor_data,
   abck,
+  bm_sz,
   cookieJar,
   usedUserAgent,
   proxy,
@@ -299,36 +369,48 @@ function genCookie(
 ) {
   let params = {
     method: "POST",
-    url: `${selectedSite.url}${post_url}`,
+    http2: true,
     headers: {
-      Accept:
-        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-      "Accept-Encoding": "gzip, deflate, br",
-      "Accept-Language": "en-US,en;q=0.9",
-      "Content-Type": "application/json",
-      dnt: "1",
-      Host: selectedSite.host,
-      "User-Agent": usedUserAgent,
-      Connection: "keep-alive",
-      "Cache-Control": "no-cache",
+      accept: "*/*",
+      "accept-encoding": "gzip, deflate, br",
+      "accept-language": "en-US,en;q=0.9",
+      // cookie: `_abck=${abck}; bm_sz=${bm_sz}`,
+      origin: "https://www.finishline.com",
+      referer: "https://www.finishline.com/",
+      "sec-fetch-site": "same-origin",
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "user-agent": usedUserAgent,
     },
     body: JSON.stringify({
       sensor_data: sensor_data,
     }),
-    gzip: true,
-    proxy: proxy !== null ? `http://${proxy}` : null,
-    timeout: 2000,
-    jar: cookieJar,
-    resolveWithFullResponse: true,
+    responseType: "json",
+    decompress: true,
+    agent: !proxy
+      ? null
+      : {
+          https: tunnel.httpsOverHttp({
+            proxy: {
+              host: "proxy.packetstream.io",
+              port: "31112",
+              proxyAuth: "ericz123:eb08eB4QEp2lprWE_country-UnitedStates",
+            },
+          }),
+        },
+    timeout: 10000,
+    cookieJar,
   };
 
   // # make request
-  return request(params)
+  return got(`${selectedSite.url}${post_url}`, params)
     .then((resp) => {
       const cookie = resp.headers["set-cookie"]
         .toString()
         .split("_abck=")[1]
         .split("; Domain")[0];
+
+      console.log(cookie);
 
       return cookie;
     })
@@ -388,7 +470,6 @@ function sed() {
  * @returns {string} MR Value
  */
 function getmr() {
-  var x = lodash.random(10000, 20000);
   for (
     var a = "",
       t = 1e3,
@@ -419,8 +500,8 @@ function getmr() {
       c = 0;
     if (void 0 !== e[n]) {
       for (i = 0; i < t && m < 0.6; i++) {
-        for (var b = performance.now() + x, d = 0; d < 4e3; d++) e[n](3.14);
-        var k = performance.now() + x;
+        for (var b = performance.now(), d = 0; d < 4e3; d++) e[n](3.14);
+        var k = performance.now();
         o.push(Math.round(1e3 * (k - b))), (m = k - r);
       }
       var l = o.sort();
@@ -437,13 +518,13 @@ function getmr() {
 function gd(ua_browser, usedUserAgent, bmak, browserData) {
   var a = usedUserAgent,
     t = "" + ab(a),
-    e = Math.floor(bmak.start_ts / 2),
+    e = bmak.start_ts / 2,
     n = browserData.screenSize.availWidth, // avil width
     o = browserData.screenSize.availHeight, // availHeight
     m = browserData.screenSize.width, // width
     r = browserData.screenSize.height, // height
-    i = browserData.screenSize.clientHeight, // clientHeight
-    c = browserData.screenSize.clientWidth, // clientWidth
+    i = browserData.screenSize.clientWidth, // clientWidth
+    c = browserData.screenSize.clientHeight, // clientHeight
     b = browserData.screenSize.outerWidth; // outerWidth
   bmak.z1 = parseInt(bmak.start_ts / (2016 * 2016));
   var d = Math.random(),
@@ -834,7 +915,7 @@ function updatetd() {
 
   try {
     var a = 0;
-    a = Date.now ? Date.now() - lodash.random(2, 12) : +new Date() - 20;
+    a = Date.now ? Date.now() - lodash.random(10, 30) : +new Date() - 10;
     var n = 0;
     n = Date.now ? Date.now() : +new Date();
     td = n - a;
@@ -896,7 +977,7 @@ function rir(a, t, e, n) {
  */
 function data(ua_browser, browserData) {
   return [
-    browserData.canvas.firstCanvasValue, // first canvas value
+    canvas(), // first canvas value
     browserData.canvas.secondCanvasValue, // second canvas value
     "dis",
     pluginInfo(ua_browser),
@@ -914,12 +995,12 @@ function data(ua_browser, browserData) {
     .join(";");
 }
 
-// /**
-//  * @description get random canvas
-//  */
-// function canvas() {
-//   return lodash.sample(JSON.parse(canvas.canvas));
-// }
+/**
+ * @description get random canvas
+ */
+function canvas() {
+  return lodash.sample(canvasArray.canvas);
+}
 
 // function canvas_2() {
 //   return lodash.sample([66351601, 1396487819]).toString();
@@ -995,12 +1076,11 @@ function bezier(t, p0, p1, p2, p3) {
  * @returns Random Mouse Data
  */
 function genMouseData(bmak) {
-  var timeStamp =
-    Math.round(get_cf_date() - (new Date() - 20)) + lodash.random(2000, 10000);
+  var timeStamp = updatet(bmak);
   var mouseString = "";
   (p0 = {
-    x: lodash.random(10, 25),
-    y: lodash.random(10, 25),
+    x: 10,
+    y: 25,
   }), //use whatever points you want obviously
     (p1 = {
       x: lodash.random(80, 100),
@@ -1011,13 +1091,21 @@ function genMouseData(bmak) {
       y: lodash.random(75, 200),
     }),
     (p3 = {
-      x: lodash.random(500, 750),
-      y: lodash.random(20, 100),
+      x: lodash.random(500, 850),
+      y: lodash.random(20, 150),
     });
-  var loop_amount = 99;
-  for (var i = 0; i <= loop_amount; i++) {
+
+  var loop_amount = -1; // set back to whatever lodash.random(60, 99) later
+
+  timeStamp -= lodash.random(300, 350);
+  //# for the first string it0
+  mouseString += bmak.me_cnt + ",2," + timeStamp + ",-1,-1,-1,it0;";
+  bmak.me_cnt += 1;
+  bmak.me_vel += bmak.me_cnt + 1 + timeStamp - 2;
+
+  for (var i = 1; i <= loop_amount; i++) {
     var p = bezier(i / 100, p0, p1, p2, p3);
-    timeStamp = timeStamp + lodash.random(2, 6);
+    timeStamp = timeStamp + lodash.random(10, 20);
     bmak.me_cnt += 1;
     if (i == loop_amount) {
       mouseString =
@@ -1029,7 +1117,7 @@ function genMouseData(bmak) {
         Math.round(p.x) +
         "," +
         Math.round(p.y) +
-        ",-1;";
+        "-1;";
     } else {
       bmak.me_vel += i + 1 + timeStamp + Math.round(p.x) + Math.round(p.y);
       bmak.ta += timeStamp;
@@ -1050,4 +1138,6 @@ function genMouseData(bmak) {
   return mouseString;
 }
 
-module.exports = startSensorGen;
+startSensorGen("dicks", false);
+
+// module.exports = startSensorGen;
