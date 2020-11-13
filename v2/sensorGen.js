@@ -18,7 +18,6 @@ class SensorGen {
     this.targetSite = null;
     this.proxy = proxy;
 
-    this.cookieJar = new CookieJar();
     // # starting timestamp
     this.start_ts = this.get_cf_date(true) - lodash.random(300, 900);
     // # ALL BMAK DATA
@@ -91,6 +90,8 @@ class SensorGen {
   async makeSensor(site) {
     // # start tracking
     this.to();
+    // # create new cookie jar per sensor data
+    const cookieJar = new CookieJar();
     // # get random browser data
     const browserData = genBrowserData();
     // # get random user-agent
@@ -100,7 +101,7 @@ class SensorGen {
     // # get the selected site
     const selectedSite = siteOptions.find((s) => s[site] && s)[site];
     // # make a request to get invalid cookie
-    const result = await this.getCookie(selectedSite, usedUserAgent);
+    const result = await this.getCookie(selectedSite, usedUserAgent, cookieJar);
     // # getting browser fingerprint data
     let n = this.gd(ua_browser, usedUserAgent, browserData);
     // # get site url
@@ -235,11 +236,83 @@ class SensorGen {
       "-1,2,-94,-121,";
 
     // # full sensor
-    const fullSensor = this.gen_key(this.bmak.sensor_data);
-    console.log(fullSensor);
+    return {
+      selectedSite,
+      sensor_data: this.gen_key(this.bmak.sensor_data),
+      usedUserAgent,
+      post_url: result.pUrl,
+      cookieJar,
+    };
   }
 
-  async getCookie(selectedSite, usedUserAgent) {
+  /**
+   *
+   * @param {*} site
+   * @return valid cookie
+   */
+  async makeCookie(site) {
+    try {
+      // # gen sensor data
+      const {
+        selectedSite,
+        sensor_data,
+        usedUserAgent,
+        post_url,
+        cookieJar,
+      } = await this.makeSensor(site);
+
+      let params = {
+        method: "POST",
+        http2: true,
+        headers: {
+          accept: "*/*",
+          "accept-encoding": "gzip, deflate, br",
+          "accept-language": "en-US,en;q=0.9",
+          // cookie: `_abck=${abck};`,
+          origin: `https://www.${site}.com`,
+          referer: `https://www.${site}.com/`,
+          "sec-fetch-site": "same-origin",
+          "sec-fetch-dest": "empty",
+          "sec-fetch-mode": "cors",
+          "user-agent": usedUserAgent,
+        },
+        body: JSON.stringify({
+          sensor_data: sensor_data,
+        }),
+        responseType: "json",
+        decompress: true,
+        agent: !this.proxy
+          ? null
+          : {
+              https: tunnel.httpsOverHttp({
+                proxy: {
+                  host: "proxy.packetstream.io",
+                  port: "31112",
+                  proxyAuth: "ericz123:eb08eB4QEp2lprWE_country-UnitedStates",
+                },
+              }),
+            },
+        timeout: 10000,
+        cookieJar: cookieJar,
+      };
+
+      // # make request
+      const resp = await got(`${selectedSite.url}${post_url}`, params);
+      // # grab cookie
+      const cookie = resp.headers["set-cookie"]
+        .toString()
+        .split("_abck=")[1]
+        .split("; Domain")[0];
+
+      console.log(cookie);
+    } catch (e) {
+      if (e) {
+        console.log("\x1b[31m", `[POST] ${e.message}`);
+      }
+    }
+  }
+
+  async getCookie(selectedSite, usedUserAgent, cookieJar) {
     // # make request
     const resp = await got(selectedSite.url, {
       method: "GET",
@@ -259,7 +332,7 @@ class SensorGen {
               },
             }),
           },
-      cookieJar: this.cookieJar,
+      cookieJar: cookieJar,
     });
 
     let p = /src="\/(static|assets|api|resources|public)\/(\w+)/gm.exec(
