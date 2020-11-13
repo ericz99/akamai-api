@@ -63,6 +63,8 @@ function ssh() {
   return ssh;
 }
 
+function pluginInfo() {}
+
 /**
  * @description get the fas value
  */
@@ -331,6 +333,10 @@ function getAllBrowserData() {
     userAgent: getUserAgent(),
     canvas: getCanvasValue(),
     screenSize: getScreenSize(),
+    navigator: usedDevice.navigator,
+    window: usedDevice.window,
+    document: usedDevice.document,
+    screen: usedDevice.screen,
     mr: getMr(),
     ssh: ssh(),
     fas: fas(),

@@ -28,14 +28,7 @@ async function getScript(selectedSite, usedUserAgent, cookieJar, proxy) {
     method: "GET",
     http2: true,
     headers: {
-      accept: "*/*",
-      "accept-encoding": "gzip, deflate, br",
-      "accept-language": "en-US,en;q=0.9",
-      origin: "https://www.finishline.com/",
-      referer: "https://www.finishline.com/",
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-origin",
+      ...selectedSite.headers,
       "user-agent": usedUserAgent,
     },
     agent: !proxy
@@ -83,7 +76,7 @@ async function startSensorGen(site, proxy) {
   try {
     const browserData = genBrowserData();
     const cookieJar = new CookieJar();
-    const usedUserAgent = userAgent.toString().replace(/\|"/g, "");
+    const usedUserAgent = browserData.userAgent.toString().replace(/\|"/g, "");
     const ua_browser = getUaBrowser(usedUserAgent);
     const selectedSite = siteOptions.find((s) => s[site] && s)[site];
 
@@ -143,10 +136,7 @@ async function generateSensorData(
   post_url
 ) {
   let startTS = 0;
-
-  if (site == "finishline") {
-    startTS = get_cf_date(true) - lodash.random(300, 900);
-  }
+  startTS = get_cf_date(true) - lodash.random(600, 900);
 
   let bmak = {
     ver: 1.66,
@@ -206,7 +196,7 @@ async function generateSensorData(
     vcact: "",
   };
 
-  let rand = lodash.random(200, 400);
+  let rand = lodash.random(500, 700);
   let fpValstr = data(ua_browser, browserData).replace(/"/g, '"') + ";-1";
   let p = ab(fpValstr);
   let yy = Math.floor(1e3 * Math.random()).toString();
@@ -220,13 +210,11 @@ async function generateSensorData(
   // # get dmact
   var dmact = events[site].cdma(bmak, updatet(bmak), rand);
   // # get vcact only for certain site
-  events[site].lvc(bmak, updatet(bmak));
+  // events[site].lvc(bmak, updatet(bmak));
   // # get the jrs(start_ts)
   const ss = jrs(bmak.start_ts);
   // # execute certain function first
   to(bmak);
-
-  console.log(ss);
 
   // # our sensor data
   let sensor_data =
@@ -245,7 +233,7 @@ async function generateSensorData(
     // bmak.kact is 0 || is empty
     "-1,2,-94,-110," +
     // bmak.mact == mouse mouvement gonna use browser to generate
-    genMouseData(bmak) +
+    // genMouseData(bmak) +
     "-1,2,-94,-117," +
     // bmak.tact is empty
     "-1,2,-94,-111," +
@@ -374,7 +362,7 @@ function genCookie(
       accept: "*/*",
       "accept-encoding": "gzip, deflate, br",
       "accept-language": "en-US,en;q=0.9",
-      // cookie: `_abck=${abck}; bm_sz=${bm_sz}`,
+      // cookie: `_abck=${abck};`,
       origin: "https://www.finishline.com",
       referer: "https://www.finishline.com/",
       "sec-fetch-site": "same-origin",
@@ -383,7 +371,8 @@ function genCookie(
       "user-agent": usedUserAgent,
     },
     body: JSON.stringify({
-      sensor_data: sensor_data,
+      sensor_data:
+        "7a74G7m23Vrp0o5c9100031.66-1,2,-94,-100,Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36,uaend,12147,20030107,en-US,Gecko,3,0,0,0,394964,5367238,1920,1040,1920,1080,1920,969,1920,,cpen:0,i1:0,dm:0,cwen:0,non:1,opc:0,fc:0,sc:0,wrc:1,isc:0,vib:1,bat:1,x11:0,x12:1,8325,0.03743824618,802617683370.5,0,loc:-1,2,-94,-101,do_en,dm_en,t_en-1,2,-94,-105,0,0,0,0,-1,113,0;0,-1,0,1,2352,3433,0;0,-1,0,1,2358,3317,0;0,-1,0,1,2353,2984,0;1,0,0,1,2716,3002,0;0,-1,0,1,2371,3002,0;0,-1,0,1,2891,2984,0;0,-1,0,0,1805,4204,0;0,-1,0,0,1009,3946,0;1,0,0,1,3256,3002,0;0,-1,0,0,2893,-1,0;0,-1,0,1,2911,3002,0;0,-1,0,1,2892,3433,0;0,-1,0,1,2898,3317,0;0,-1,0,0,-1,2424,0;-1,2,-94,-102,0,0,0,0,-1,113,0;0,-1,0,1,2352,3433,0;0,-1,0,1,2358,3317,0;0,-1,0,1,2353,2984,0;1,0,0,1,2716,3002,0;0,-1,0,1,2371,3002,0;0,-1,0,1,2891,2984,0;0,-1,0,0,1805,4204,0;0,-1,0,0,1009,3946,0;1,0,0,1,3256,3002,0;0,-1,0,0,2893,-1,0;0,-1,0,1,2911,3002,0;0,-1,0,1,2892,3433,0;0,-1,0,1,2898,3317,0;0,-1,0,0,-1,2424,0;-1,2,-94,-108,-1,2,-94,-110,-1,2,-94,-117,-1,2,-94,-111,0,500,-1,-1,-1;-1,2,-94,-109,0,500,-1,-1,-1,-1,-1,-1,-1,-1,-1;-1,2,-94,-114,-1,2,-94,-103,-1,2,-94,-112,https://www.gamestop.com/-1,2,-94,-115,1,32,32,500,500,0,1000,1175,0,1605235366741,32,17172,0,0,2862,0,0,1175,1000,0,5AAD52841102F1978FF313DC3A6F145D~-1~YAAQVw0wFwiHH7N1AQAAIeB7vwTNioRRG0MoMcTaH7tuchtLSoUkyDSOp5P1YLGUPd5lisDwuXXgrviX6bNH/I9W/sCtVZNZLDIs3vdTgwZ97gm3F6sUlFb80+6gdcciM4bSA7jfEn3Es70KHFJM2PVDrJ8p+KvZJHn7Pd7r878Bg2eUGgP9GtfyrMqML62h8yS5QjOonFsjgCTXuzjc63ffSgE14VLbAtd74padVhhupHk0osEcVUQLVVKtEd7kzFjqBaE4MEhL3BoBXYtV4XaUeJm8XneVpoeFX8Q5oSVZX0OC786fjdd1HfA=~-1~-1~-1,29514,856,1748855587,30261693,PiZtE,80188,60-1,2,-94,-106,9,1-1,2,-94,-119,5,7,7,6,14,13,9,6,5,4,4,4,7,232,-1,2,-94,-122,0,0,0,0,1,0,0-1,2,-94,-123,-1,2,-94,-124,-1,2,-94,-126,-1,2,-94,-127,11321144241322243122-1,2,-94,-70,1454252292;895908107;dis;,7,8;true;true;true;300;true;24;24;true;false;-1-1,2,-94,-80,5489-1,2,-94,-116,144915360-1,2,-94,-118,110412-1,2,-94,-129,33c6f54e72ed2196a148f981eb3a5bd51bb6639069e41454a91411e89e70f64e,1,a712c19fde04cde08d21754c81e951066896404f0eac6cbfd5255e434d879986,,,,0-1,2,-94,-121,;38;9;0",
     }),
     responseType: "json",
     decompress: true,
@@ -915,7 +904,7 @@ function updatetd() {
 
   try {
     var a = 0;
-    a = Date.now ? Date.now() - lodash.random(10, 30) : +new Date() - 10;
+    a = Date.now ? Date.now() - lodash.random(30, 40) : +new Date() - 10;
     var n = 0;
     n = Date.now ? Date.now() : +new Date();
     td = n - a;
@@ -933,8 +922,17 @@ function gen_key(sensor_data, bmak) {
   var w = Math.floor(get_cf_date() / 36e5);
   var j = get_cf_date();
   var E = y + od(w, y) + sensor_data;
+
+  console.log(y);
+
   sensor_data =
-    E + ";" + lodash.random(0, 12) + ";" + bmak.tst + ";" + (get_cf_date() - j);
+    E +
+    ";" +
+    lodash.random(10, 40) +
+    ";" +
+    bmak.tst +
+    ";" +
+    (get_cf_date() - j);
   console.log(sensor_data);
   return sensor_data;
 }
@@ -977,7 +975,7 @@ function rir(a, t, e, n) {
  */
 function data(ua_browser, browserData) {
   return [
-    canvas(), // first canvas value
+    browserData.canvas.firstCanvasValue, // first canvas value
     browserData.canvas.secondCanvasValue, // second canvas value
     "dis",
     pluginInfo(ua_browser),
@@ -1138,6 +1136,6 @@ function genMouseData(bmak) {
   return mouseString;
 }
 
-startSensorGen("dicks", false);
+startSensorGen("gamestop", false);
 
 // module.exports = startSensorGen;

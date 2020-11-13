@@ -84,13 +84,31 @@
       "ver": "1.66",
       "url": "https://www.gamestop.com/",
       "host": "www.gamestop.com",
-      "informinfo": "0,0,0,0,-1,113,0;0,-1,0,1,2352,3433,1;0,-1,0,1,2358,3317,1;0,-1,0,1,2353,2984,1;1,0,0,1,2716,3002,1;0,-1,0,1,2371,3002,1;0,-1,0,1,2891,2984,1;0,-1,0,0,1805,4204,0;0,-1,0,0,1009,3946,0;1,0,0,1,3256,3002,1;0,-1,0,0,2893,-1,0;0,-1,0,1,2911,3002,1;0,-1,0,1,2892,3433,1;0,-1,0,1,2898,3317,1;0,-1,0,0,-1,2424,0;",
+      "informinfo": "0,0,0,0,-1,113,0;0,-1,0,1,2352,3433,0;0,-1,0,1,2358,3317,0;0,-1,0,1,2353,2984,0;1,0,0,1,2716,3002,0;0,-1,0,1,2371,3002,0;0,-1,0,1,2891,2984,0;0,-1,0,0,1805,4204,0;0,-1,0,0,1009,3946,0;1,0,0,1,3256,3002,0;0,-1,0,0,2893,-1,0;0,-1,0,1,2911,3002,0;0,-1,0,1,2892,3433,0;0,-1,0,1,2898,3317,0;0,-1,0,0,-1,2424,0;",
       "headers": {
         "accept": "*/*",
         "accept-encoding": "gzip, deflate, br",
         "accept-language": "en-US,en;q=0.9",
         "origin": "https://www.gamestop.com/",
         "referer": "https://www.gamestop.com/",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin"
+      }
+    }
+  },
+  {
+    "musiciansfriend": {
+      "ver": "1.66",
+      "url": "https://www.musiciansfriend.com/",
+      "host": "www.gamestop.com",
+      "informinfo": "0,-1,0,0,1038,310,0;0,-1,0,1,488,2483,0;",
+      "headers": {
+        "accept": "*/*",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "en-US,en;q=0.9",
+        "origin": "https://www.musiciansfriend.com/",
+        "referer": "https://www.musiciansfriend.com/",
         "sec-fetch-dest": "empty",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin"

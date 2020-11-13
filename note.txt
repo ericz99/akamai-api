@@ -26,5 +26,23 @@ doact, -
 me_vel
 dme_vel, 
 
-the cookie that i get from GET request, is much shorter, than the browser
-ideally, what i believe is that you may need tls to get the actual length cookie
+CONFIRMED (actually tried it out):
+
+i put my fake cookie that i gen to real sensor data, and 24 ^ ab(sensor_data),
+and it gave me a real cookie.
+
+- not the canvas value, shouldn't matter at actually
+
+---------------------------------------------------------
+
+- 1. it has to do with events
+- 2. timestamp is kinda wrong
+- 3. bmak.fpcf.td is probably wrong
+- 4. o9? might be off idk probably its right, but it has to do with timestamp as well
+
+---------------------------------------------------------
+
+- NEW(DISCOVERED)
+
+- 1. ALL MY BROWSER  DEVICE DATA WAS WRONG, I HAD EVERYTHING STATIC
+- 2. must fix gd(), all browser related stuff bd etc etc

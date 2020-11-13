@@ -79,6 +79,7 @@ class SensorGen {
       vc_cnt_lmt: 100,
       vc_cnt: 0,
       vcact: "",
+      nav_perm: "11321144241322243122",
     };
   }
 
@@ -88,6 +89,8 @@ class SensorGen {
    * @description responsible for creating sensor data
    */
   async makeSensor(site) {
+    // # start tracking
+    this.to();
     // # get random browser data
     const browserData = genBrowserData();
     // # get random user-agent
@@ -102,6 +105,24 @@ class SensorGen {
     let n = this.gd(ua_browser, usedUserAgent, browserData);
     // # get site url
     let b = selectedSite.url;
+    // # get random canvas array
+    let rVal = Math.floor(1e3 * Math.random()).toString();
+    let rCFP = canvasArray.canvas[rVal].toString();
+    let mrRand = mrArray.mr[Math.floor(4000 * Math.random())].toString();
+    let fpValstr = this.data(browserData).replace(/"/g, '"') + ";-1";
+    let g = "" + this.ab(fpValstr);
+    // # update tst
+    this.bmak.tst =
+      this.get_cf_date() - (this.get_cf_date() - lodash.random(3, 9));
+    let rand = lodash.random(500, 700);
+    // # get doact
+    var doact = events[site].cdoa(this.bmak, this.updatet(), rand);
+    // # get dmact
+    var dmact = events[site].cdma(this.bmak, this.updatet(), rand);
+    // # get vcact only for certain site
+    // events[site].lvc(bmak, updatet(bmak));
+    // # get the jrs(start_ts)
+    const ss = this.jrs(this.bmak.start_ts);
     // # first sensor data string
     this.bmak.sensor_data =
       this.bmak.ver +
@@ -110,9 +131,9 @@ class SensorGen {
       "-1,2,-94,-101," +
       "do_en,dm_en,t_en" +
       "-1,2,-94,-105," +
-      // bmak.informinfo;
+      selectedSite.informinfo +
       "-1,2,-94,-102," +
-      // bmak.informinfo
+      selectedSite.informinfo +
       "-1,2,-94,-108," +
       // bmak.kact
       "-1,2,-94,-110," +
@@ -120,18 +141,102 @@ class SensorGen {
       "-1,2,-94,-117," +
       //  bmak.tact
       "-1,2,-94,-111," +
-      // bmak.doact
+      doact +
       "-1,2,-94,-109," +
-      // bmak.dmact
+      dmact +
       "-1,2,-94,-114," +
       // bmak.pact
       "-1,2,-94,-103," +
       // bmak.vcact
       "-1,2,-94,-112," +
       b +
-      "-1,2,-94,-115,";
+      "-1,2,-94,-115," +
+      [
+        this.bmak.ke_vel + 1,
+        this.bmak.me_vel + 32,
+        this.bmak.te_vel + 32,
+        this.bmak.doe_vel,
+        this.bmak.dme_vel,
+        this.bmak.pe_vel,
+        this.bmak.ke_vel +
+          this.bmak.me_vel +
+          this.bmak.doe_vel +
+          this.bmak.dme_vel +
+          this.bmak.te_vel +
+          this.bmak.pe_vel,
+        this.updatet(),
+        this.bmak.init_time,
+        this.bmak.start_ts,
+        this.updatetd(),
+        this.bmak.d2,
+        this.bmak.ke_cnt,
+        this.bmak.me_cnt,
+        this.pi(this.bmak.d2 / 6),
+        this.bmak.pe_cnt,
+        this.bmak.te_cnt,
+        this.get_cf_date(true) - this.bmak.start_ts,
+        this.bmak.ta,
+        this.bmak.n_ck,
+        result.cookie,
+        this.ab(result.cookie),
+        rVal,
+        rCFP,
+        browserData.fas,
+        this.ff(80) + this.ff(105) + this.ff(90) + this.ff(116) + this.ff(69),
+        ss[0],
+        ss[1],
+      ].join(",") +
+      "-1,2,-94,-106," +
+      this.bmak.aj_type + // aj_type is the  type of event for example; 6 is something to do with mouse
+      "," +
+      this.bmak.aj_indx;
+    // # second sensor string
+    this.bmak.sensor_data =
+      this.bmak.sensor_data +
+      "-1,2,-94,-119," +
+      mrRand +
+      "-1,2,-94,-122," +
+      this.sed() +
+      "-1,2,-94,-123," +
+      "" + // for challenge cookie i think
+      "-1,2,-94,-124," +
+      "" + // also for challenge cookie
+      "-1,2,-94,-126," +
+      "" + // also for challenge cookie
+      "-1,2,-94,-127," +
+      this.bmak.nav_perm;
 
-    console.log(result);
+    var L = 24 ^ this.ab(this.bmak.sensor_data);
+    // # third sensor string
+    this.bmak.sensor_data =
+      this.bmak.sensor_data +
+      "-1,2,-94,-70," +
+      fpValstr +
+      "-1,2,-94,-80," +
+      g +
+      "-1,2,-94,-116," +
+      this.bmak.o9 +
+      "-1,2,-94,-118," +
+      L +
+      "-1,2,-94,-129," +
+      (browserData.fmh +
+        "," +
+        browserData.fmz +
+        "," +
+        browserData.ssh +
+        "," +
+        this.bmak.wv +
+        "," +
+        this.bmak.wr +
+        "," +
+        this.bmak.weh +
+        "," +
+        this.bmak.wl) +
+      "-1,2,-94,-121,";
+
+    // # full sensor
+    const fullSensor = this.gen_key(this.bmak.sensor_data);
+    console.log(fullSensor);
   }
 
   async getCookie(selectedSite, usedUserAgent) {
@@ -215,6 +320,135 @@ class SensorGen {
 
   /**
    *
+   * @param {*} sensor_data
+   * @description gen first key of the sensor data string
+   * @returns full sensor data
+   */
+  gen_key(sensor_data) {
+    var a = this.get_cf_date();
+    var y = this.od(
+      "0a46G5m17Vrp4o4c",
+      "afSbep8yjnZUjq3aL010jO15Sawj2VZfdYK8uY90uxq"
+    ).slice(0, 16);
+    var w = Math.floor(this.get_cf_date() / 36e5);
+    var j = this.get_cf_date();
+    var E = y + this.od(w, y) + sensor_data;
+    sensor_data =
+      E +
+      ";" +
+      lodash.random(10, 40) +
+      ";" +
+      this.bmak.tst +
+      ";" +
+      (this.get_cf_date() - j);
+    return sensor_data;
+  }
+
+  /**
+   *
+   * @param {*} a
+   * @param {*} t
+   * @description some encryption
+   */
+  od(a, t) {
+    try {
+      (a = String(a)), (t = String(t));
+      var e = [],
+        n = t.length;
+      if (n > 0) {
+        for (var o = 0; o < a.length; o++) {
+          var m = a.charCodeAt(o),
+            r = a.charAt(o),
+            i = t.charCodeAt(o % n);
+          (m = this.rir(m, 47, 57, i)),
+            m != a.charCodeAt(o) && (r = String.fromCharCode(m)),
+            e.push(r);
+        }
+        if (e.length > 0) return e.join("");
+      }
+    } catch (a) {}
+    return a;
+  }
+
+  rir(a, t, e, n) {
+    return a > t && a <= e && (a += n % (e - t)) > e && (a = a - e + t), a;
+  }
+
+  /**
+   *
+   * @param {*} browserData
+   * @return fpcf browser fingerprint
+   */
+  data(browserData) {
+    return [
+      browserData.canvas.firstCanvasValue, // first canvas value
+      browserData.canvas.secondCanvasValue, // second canvas value
+      "dis",
+      this.pluginInfo(browserData),
+      !!browserData.window.sessionStorage,
+      !!browserData.window.localStorage,
+      !!browserData.window.indexedDB,
+      new Date().getTimezoneOffset(),
+      this.webrtcKey(browserData),
+      browserData.screen.colorDepth ? browserData.screen.colorDepth : -1,
+      browserData.screen.pixelDepth ? browserData.screen.pixelDepth : -1,
+      browserData.navigator.cookieEnabled
+        ? browserData.navigator.cookieEnabled
+        : -1,
+      browserData.navigator.javaEnabled,
+    ].join(";");
+  }
+
+  webrtcKey(browserData) {
+    return (
+      "function" == browserData.window.RTCPeerConnection ||
+      "function" == browserData.window.mozRTCPeerConnection ||
+      "function" == browserData.window.webkitRTCPeerConnection
+    );
+  }
+
+  pluginInfo(browserData) {
+    let PLUGINS = [
+      "WebEx64 General Plugin Container",
+      "YouTube Plug-in",
+      "Java Applet Plug-in",
+      "Shockwave Flash",
+      "iPhotoPhotocast",
+      "SharePoint Browser Plug-in",
+      "Chrome Remote Desktop Viewer",
+      "Chrome PDF Viewer",
+      "Native Client",
+      "Unity Player",
+      "WebKit-integrierte PDF",
+      "QuickTime Plug-in",
+      "RealPlayer Version Plugin",
+      "RealPlayer(tm) G2 LiveConnect-Enabled Plug-In (32-bit)",
+      "Mozilla Default Plug-in",
+      "Adobe Acrobat",
+      "AdobeAAMDetect",
+      "Google Earth Plug-in",
+      "Java Plug-in 2 for NPAPI Browsers",
+      "Widevine Content Decryption Module",
+      "Microsoft Office Live Plug-in",
+      "Windows Media Player Plug-in Dynamic Link Library",
+      "Google Talk Plugin Video Renderer",
+      "Edge PDF Viewer",
+      "Shockwave for Director",
+      "Default Browser Helper",
+      "Silverlight Plug-In",
+    ];
+
+    if (void 0 === browserData.navigator.plugins) return null;
+    for (var a = PLUGINS.length, e = "", n = 0; n < a; n++) {
+      var o = PLUGINS[n];
+      browserData.navigator.plugins.includes(o) && (e = e + "," + n);
+    }
+
+    return e;
+  }
+
+  /**
+   *
    * @param {*} ua_browser
    * @param {*} usedUserAgent
    * @param {*} browserData
@@ -237,8 +471,8 @@ class SensorGen {
     let s = d + "";
     return (
       (s = s.slice(0, 11) + k),
-      this.get_browser(ua_browser),
-      this.bc(ua_browser),
+      this.get_browser(browserData),
+      this.bc(browserData),
       this.bmisc(),
       a +
         ",uaend," +
@@ -276,7 +510,7 @@ class SensorGen {
         "," +
         b +
         "," +
-        this.bd(ua_browser) +
+        this.bd(browserData) +
         "," +
         t +
         "," +
@@ -292,24 +526,24 @@ class SensorGen {
 
   /**
    *
-   * @param {*} ua_browser
+   * @param {*} browserData
    *
    */
-  bc(ua_browser) {
-    var a = 1,
-      t = 1,
-      e = 0,
-      n = 0,
-      o = 1,
-      m = 1,
-      r = this.touchEvent(ua_browser),
-      i = 0,
-      c = 1,
-      b = 1,
-      d = this.chrome(ua_browser),
-      k = 1,
-      l = 0,
-      s = 1;
+  bc(browserData) {
+    var a = browserData.window.addEventListener ? 1 : 0,
+      t = browserData.window.XMLHttpRequest ? 1 : 0,
+      e = browserData.window.XDomainRequest ? 1 : 0,
+      n = browserData.window.emit ? 1 : 0,
+      o = browserData.window.DeviceOrientationEvent ? 1 : 0,
+      m = browserData.window.DeviceMotionEvent ? 1 : 0,
+      r = browserData.window.TouchEvent ? 1 : 0,
+      i = browserData.window.spawn ? 1 : 0,
+      c = browserData.window.chrome.isPresent ? 1 : 0,
+      b = Function.prototype.bind ? 1 : 0,
+      d = browserData.window.Buffer ? 1 : 0,
+      k = browserData.window.PointerEvent ? 1 : 0,
+      s = browserData.window.innerWidth ? 1 : 0,
+      l = browserData.window.outerWidth ? 1 : 0;
     this.bmak.xagg =
       a +
       (t << 1) +
@@ -329,190 +563,129 @@ class SensorGen {
 
   /**
    *
-   * @param {*} browser
-   * @return touch event number
+   * @param {*} browserData
+   * @description get browser data like product language etc
    */
-  touchEvent(browser) {
-    switch (browser) {
-      case "chrome":
-        return 1;
-      case "ie":
-        return 0;
-      case "opera":
-        return 1;
-      case "firefox":
-        return 1;
-      case "safari":
-        return 0;
-    }
+  get_browser(browserData) {
+    this.bmak.psub = browserData.navigator.productSub;
+    this.bmak.lang = browserData.navigator.language;
+    this.bmak.prod = browserData.navigator.product;
+    this.bmak.plen = browserData.navigator.plugins.length;
+  }
+
+  updatet() {
+    return this.get_cf_date() - this.bmak.start_ts;
+  }
+
+  sed() {
+    return [0, 0, 0, 0, 1, 0, 0].join(",");
+  }
+
+  /**
+   * @description for fpcf.td
+   */
+  updatetd() {
+    var td = 0;
+
+    try {
+      var a = 0;
+      a = Date.now ? Date.now() - lodash.random(30, 40) : +new Date() - 10;
+      var n = 0;
+      n = Date.now ? Date.now() : +new Date();
+      td = n - a;
+    } catch (a) {}
+
+    return td;
   }
 
   /**
    *
-   * @param {*} browser
-   * @return if its a chrome browser
-   */
-  chrome(browser) {
-    switch (browser) {
-      case "chrome":
-        return 1;
-      default:
-        return 0;
-    }
-  }
-
-  /**
-   *
-   * @param {*} ua_browser
-   * @description get browser navigator
-   */
-  get_browser(ua_browser) {
-    (this.bmak.psub = this.productSub(ua_browser)),
-      (this.bmak.lang = "en-US"),
-      (this.bmak.prod = "Gecko"),
-      (this.bmak.plen = this.pluginsLength(ua_browser));
-  }
-
-  /**
-   *
-   * @param {*} browser
-   * @description get plugin length of browser
-   * @returns length of the browser plugins
-   */
-  pluginsLength(browser) {
-    switch (browser) {
-      case "chrome":
-        return 3;
-      case "ie":
-        return 1;
-      case "opera":
-        return 1;
-      case "firefox":
-        return 0;
-      case "safari":
-        return 1;
-    }
-  }
-
-  /**
-   *
-   * @param {*} browser
-   * @description  get product sub of browser
-   * @returns product sub
-   */
-  productSub(browser) {
-    switch (browser) {
-      case "chrome":
-        return 20030107;
-      case "ie":
-        return 20030107;
-      case "opera":
-        return 20030107;
-      case "firefox":
-        return 20100101;
-      case "safari":
-        return 20030107;
-    }
-  }
-
-  /**
-   *
-   * @param {*} browser
+   * @param {*} browserData
    * @description get our browser plugins like if its chrome etc etc
    *
    */
-  bd(browser) {
-    switch (browser) {
-      case "chrome":
-        return [
-          ",cpen:0",
-          "i1:0",
-          "dm:0",
-          "cwen:0",
-          "non:1",
-          "opc:0",
-          "fc:0",
-          "sc:0",
-          "wrc:1",
-          "isc:0",
-          "vib:1",
-          "bat:1",
-          "x11:0",
-          "x12:1",
-        ].join(",");
-      case "ie":
-        return [
-          ",cpen:0",
-          "i1:1",
-          "dm:1",
-          "cwen:0",
-          "non:1",
-          "opc:0",
-          "fc:0",
-          "sc:0",
-          "wrc:0",
-          "isc:0",
-          "vib:0",
-          "bat:0",
-          "x11:0",
-          "x12:1",
-        ].join(",");
-      case "opera":
-        return [
-          ",cpen:0",
-          "i1:0",
-          "dm:0",
-          "cwen:0",
-          "non:1",
-          "opc:1",
-          "fc:0",
-          "sc:0",
-          "wrc:1",
-          "isc:0",
-          "vib:0",
-          "bat:1",
-          "x11:0",
-          "x12:1",
-        ].join(",");
-      case "firefox":
-        return [
-          ",cpen:0",
-          "i1:0",
-          "dm:0",
-          "cwen:0",
-          "non:1",
-          "opc:0",
-          "fc:1",
-          "sc:0",
-          "wrc:1",
-          "isc:1",
-          "vib:1",
-          "bat:0",
-          "x11:0",
-          "x12:1",
-        ].join(",");
-      case "safari":
-        return [
-          ",cpen:0",
-          "i1:0",
-          "dm:0",
-          "cwen:0",
-          "non:1",
-          "opc:0",
-          "fc:0",
-          "sc:0",
-          "wrc:1",
-          "isc:0",
-          "vib:0",
-          "bat:0",
-          "x11:0",
-          "x12:1",
-        ].join(",");
-    }
+  bd(browserData) {
+    let a = [];
+    let t = browserData.window.callPhantom ? 1 : 0;
+    a.push(",cpen:" + t);
+    let e = 0;
+    browserData.window.ActiveXObject &&
+      "ActiveXObject" in browserData.window &&
+      (e = 1);
+    a.push("i1:" + e);
+    var n = "number" == typeof browserData.document.documentMode ? 1 : 0;
+    a.push("dm:" + n);
+    var o =
+      browserData.window.chrome && browserData.window.chrome.webstore ? 1 : 0;
+    a.push("cwen:" + o);
+    var m = browserData.navigator.onLine ? 1 : 0;
+    a.push("non:" + m);
+    var r = browserData.window.opera ? 1 : 0;
+    a.push("opc:" + r);
+    var i = "undefined" != typeof browserData.windowInstallTrigger ? 1 : 0;
+    a.push("fc:" + i);
+    var c =
+      browserData.window.HTMLElement &&
+      Object.prototype.toString
+        .call(browserData.window.HTMLElement)
+        .indexOf("Constructor") > 0
+        ? 1
+        : 0;
+    a.push("sc:" + c);
+    var b =
+      "function" == browserData.window.RTCPeerConnection ||
+      "function" == browserData.window.mozRTCPeerConnection ||
+      "function" == browserData.window.webkitRTCPeerConnection
+        ? 1
+        : 0;
+    a.push("wrc:" + b);
+    var d =
+      "mozInnerScreenY" in browserData.window
+        ? browserData.window.mozInnerScreenY
+        : 0;
+    a.push("isc:" + d), (this.bmak.d2 = parseInt(this.bmak.z1 / 23));
+    var k = "function" == browserData.navigator.vibrate ? 1 : 0;
+    a.push("vib:" + k);
+    var s = "function" == browserData.navigator.getBattery ? 1 : 0;
+    a.push("bat:" + s);
+    var l = Array.prototype.forEach ? 0 : 1;
+    a.push("x11:" + l);
+    var u = "FileReader" in browserData.window ? 1 : 0;
+    return a.push("x12:" + u), a.join(",");
   }
 
   bmisc() {
     (this.bmak.pen = 0), (this.bmak.wen = 0), (this.bmak.den = 0);
+  }
+
+  /**
+   *
+   * @param {*} a
+   */
+  jrs(a) {
+    for (
+      var t = Math.floor(1e5 * Math.random() + 1e4),
+        e = String(a * t),
+        n = 0,
+        o = [],
+        m = e.length >= 18;
+      o.length < 6;
+
+    )
+      o.push(parseInt(e.slice(n, n + 2))), (n = m ? n + 3 : n + 2);
+    return [t, this.cal_dis(o)];
+  }
+
+  /**
+   *
+   * @param {*} a
+   */
+  cal_dis(a) {
+    var t = a[0] - a[1],
+      e = a[2] - a[3],
+      n = a[4] - a[5],
+      o = Math.sqrt(t * t + e * e + n * n);
+    return Math.floor(o);
   }
 
   /**
@@ -543,6 +716,48 @@ class SensorGen {
     } else {
       return start ? new Date(+new Date()).getTime() : +new Date();
     }
+  }
+
+  to() {
+    var a = this.get_cf_date() % 1e7;
+    this.bmak.d3 = a;
+    for (var t = a, e = this.pi(this.ff(51)), n = 0; n < 5; n++) {
+      var o = this.pi(a / Math.pow(10, n)) % 10;
+      var m = o + 1;
+      var op = this.cc(o);
+      t = op(t, m);
+    }
+    this.bmak.o9 = t * e;
+  }
+
+  ff(a) {
+    return String.fromCharCode(a);
+  }
+
+  pi(a) {
+    return parseInt(a);
+  }
+
+  cc(a) {
+    var t = a % 4;
+    2 == t && (t = 3);
+    var e = 42 + t,
+      n = function (a, t) {
+        return 0;
+      };
+    if (42 == e)
+      var n = function (a, t) {
+        return a * t;
+      };
+    else if (43 == e)
+      var n = function (a, t) {
+        return a + t;
+      };
+    else
+      var n = function (a, t) {
+        return a - t;
+      };
+    return n;
   }
 
   /**
