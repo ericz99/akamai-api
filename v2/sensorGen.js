@@ -336,7 +336,7 @@ class SensorGen {
     sensor_data =
       E +
       ";" +
-      lodash.random(10, 40) +
+      lodash.random(30, 40) +
       ";" +
       this.bmak.tst +
       ";" +
