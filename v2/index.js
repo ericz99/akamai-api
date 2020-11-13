@@ -1,4 +1,3 @@
 const SensorGen = require("./sensorGen");
 
-// # make sensor data
-new SensorGen().makeCookie("finishline");
+module.exports = SensorGen;

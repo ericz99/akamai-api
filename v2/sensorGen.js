@@ -304,7 +304,8 @@ class SensorGen {
         .split("_abck=")[1]
         .split("; Domain")[0];
 
-      console.log(cookie);
+      // # return back valid cookie
+      return cookie;
     } catch (e) {
       if (e) {
         console.log("\x1b[31m", `[POST] ${e.message}`);
