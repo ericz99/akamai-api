@@ -42,7 +42,15 @@ and it gave me a real cookie.
 
 ---------------------------------------------------------
 
-- NEW(DISCOVERED)
+- NEW(DISCOVERED) DONE
 
 - 1. ALL MY BROWSER  DEVICE DATA WAS WRONG, I HAD EVERYTHING STATIC
 - 2. must fix gd(), all browser related stuff bd etc etc
+
+----------------------------------------------------------
+
+- NEW
+
+collect more browser data or just buy from ppl. buy at least 3000+, should be good enough
+
+improve our mact locally, and create an MACT api with math, no need to ML

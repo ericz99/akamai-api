@@ -14,12 +14,19 @@ const mrArray = require("../mrstring.json");
 const events = require("../events");
 
 class SensorGen {
-  constructor(proxy) {
+  constructor({ proxy = null, isMact = false }) {
     this.targetSite = null;
     this.proxy = proxy;
+    this.isMact = isMact;
 
-    // # starting timestamp
-    this.start_ts = this.get_cf_date(true) - lodash.random(300, 900);
+    if (!isMact) {
+      // # starting timestamp for no mact
+      this.start_ts = this.get_cf_date(true) - lodash.random(300, 900);
+    } else {
+      // # starting timestamp for mact
+      this.start_ts = this.get_cf_date(true) - lodash.random(7500, 10000);
+    }
+
     // # ALL BMAK DATA
     this.bmak = {
       ver: 1.66,
@@ -112,6 +119,8 @@ class SensorGen {
     let mrRand = mrArray.mr[Math.floor(4000 * Math.random())].toString();
     let fpValstr = this.data(browserData).replace(/"/g, '"') + ";-1";
     let g = "" + this.ab(fpValstr);
+    // # get navperm
+    this.getNavPerm(browserData);
     // # update tst
     this.bmak.tst =
       this.get_cf_date() - (this.get_cf_date() - lodash.random(3, 9));
@@ -138,7 +147,7 @@ class SensorGen {
       "-1,2,-94,-108," +
       // bmak.kact
       "-1,2,-94,-110," +
-      // bmak.mact
+      (this.isMact ? this.genMouseData(browserData) : "") +
       "-1,2,-94,-117," +
       //  bmak.tact
       "-1,2,-94,-111," +
@@ -392,6 +401,79 @@ class SensorGen {
     t();
   }
 
+  getNavPerm(browserData) {
+    try {
+      let that = this;
+      let a = [];
+      let t = [
+        "geolocation",
+        "notifications",
+        "push",
+        "midi",
+        "camera",
+        "microphone",
+        "speaker",
+        "device-info",
+        "background-sync",
+        "bluetooth",
+        "persistent-storage",
+        "ambient-light-sensor",
+        "accelerometer",
+        "gyroscope",
+        "magnetometer",
+        "clipboard",
+        "accessibility-events",
+        "clipboard-read",
+        "clipboard-write",
+        "payment-handler",
+      ];
+
+      if (!browserData.navigator.permissions)
+        return void (this.bmak.nav_perm = 6);
+      this.bmak.nav_perm = 8;
+      let e = function (t, e) {
+        for (let i = 0; i < browserData.navigator.permissions.length; i++) {
+          if (browserData.navigator.permissions[i].name == t) {
+            if (!browserData.navigator.permissions[i].state) {
+              a[e] =
+                -1 !==
+                browserData.navigator.permissions[i].message.indexOf(
+                  "is not a valid enum value of type PermissionName"
+                )
+                  ? 4
+                  : 3;
+            } else {
+              switch (browserData.navigator.permissions[i].state) {
+                case "prompt":
+                  a[e] = 1;
+                  break;
+                case "granted":
+                  a[e] = 2;
+                  break;
+                case "denied":
+                  a[e] = 0;
+                  break;
+                default:
+                  a[e] = 5;
+              }
+            }
+
+            // # just break after finding it
+            break;
+          }
+        }
+      };
+
+      let n = t.map(function (a, t) {
+        return e(a, t);
+      });
+
+      this.bmak.nav_perm = a.join("");
+    } catch (a) {
+      this.bmak.nav_perm = 7;
+    }
+  }
+
   /**
    *
    * @param {*} sensor_data
@@ -410,7 +492,7 @@ class SensorGen {
     sensor_data =
       E +
       ";" +
-      lodash.random(30, 40) +
+      (this.isMact ? lodash.random(5, 9) : lodash.random(30, 40)) +
       ";" +
       this.bmak.tst +
       ";" +
@@ -849,6 +931,100 @@ class SensorGen {
     } else {
       return ie;
     }
+  }
+
+  /**
+   * @param {*} t
+   * @param {*} p0
+   * @param {*} p1
+   * @param {*} p2
+   * @param {*} p3
+   * @returns {string} Random Mouse Movement
+   */
+  bezier(t, p0, p1, p2, p3) {
+    var cX = 3 * (p1.x - p0.x),
+      bX = 3 * (p2.x - p1.x) - cX,
+      aX = p3.x - p0.x - cX - bX;
+
+    var cY = 3 * (p1.y - p0.y),
+      bY = 3 * (p2.y - p1.y) - cY,
+      aY = p3.y - p0.y - cY - bY;
+
+    var x = aX * Math.pow(t, 3) + bX * Math.pow(t, 2) + cX * t + p0.x;
+    var y = aY * Math.pow(t, 3) + bY * Math.pow(t, 2) + cY * t + p0.y;
+
+    return {
+      x: x,
+      y: y,
+    };
+  }
+
+  /**
+   * @returns Random Mouse Data
+   */
+  genMouseData(browserData) {
+    var timeStamp = this.updatet();
+    var firstTimeStamp = lodash.random(100, 200);
+    var mouseString = "";
+    let p0 = {
+      x: lodash.random(0, browserData.window.screen.width),
+      y: lodash.random(0, browserData.window.screen.height),
+    };
+    let p1 = {
+      x: lodash.random(0, browserData.window.screen.width),
+      y: lodash.random(0, browserData.window.screen.height),
+    };
+    let p2 = {
+      x: lodash.random(0, browserData.window.screen.width),
+      y: lodash.random(0, browserData.window.screen.height),
+    };
+    let p3 = {
+      x: lodash.random(0, browserData.window.screen.width),
+      y: lodash.random(0, browserData.window.screen.height),
+    };
+
+    var loop_amount = lodash.random(70, 99); // set back to whatever lodash.random(60, 99) later
+
+    timeStamp -= lodash.random(900, 1100);
+    //# for the first string it0
+    mouseString += this.bmak.me_cnt + ",2," + firstTimeStamp + ",-1,-1,-1,it0;";
+    this.bmak.me_cnt += 1;
+    this.bmak.me_vel += this.bmak.me_cnt + 1 + firstTimeStamp - 2;
+
+    for (var i = 1; i <= loop_amount; i++) {
+      var p = this.bezier(i / 100, p0, p1, p2, p3);
+      timeStamp = timeStamp + lodash.random(10, 24);
+      this.bmak.me_cnt += 1;
+      if (i == loop_amount) {
+        mouseString =
+          mouseString +
+          this.bmak.me_cnt +
+          ",3," +
+          timeStamp +
+          "," +
+          Math.round(p.x) +
+          "," +
+          Math.round(p.y) +
+          "-1;";
+      } else {
+        this.bmak.me_vel +=
+          i + 1 + timeStamp + Math.round(p.x) + Math.round(p.y);
+        this.bmak.ta += timeStamp;
+        mouseString =
+          mouseString +
+          i +
+          ",1," +
+          timeStamp +
+          "," +
+          Math.round(p.x) +
+          "," +
+          Math.round(p.y) +
+          ";";
+      }
+      mouseString = mouseString;
+    }
+
+    return mouseString;
   }
 }
 

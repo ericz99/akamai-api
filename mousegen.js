@@ -22,20 +22,20 @@ function genPoint() {
   var points = [];
   var accuracy = 0.01, //this'll give the bezier 100 segments
     p0 = {
-      x: 10,
-      y: 10,
+      x: lodash.random(0, 1920),
+      y: lodash.random(0, 1080),
     }, //use whatever points you want obviously
     p1 = {
-      x: lodash.random(80, 100),
-      y: lodash.random(90, 120),
+      x: lodash.random(0, 1920),
+      y: lodash.random(0, 1080),
     },
     p2 = {
-      x: lodash.random(30, 50),
-      y: lodash.random(50, 100),
+      x: lodash.random(0, 1920),
+      y: lodash.random(0, 1080),
     },
     p3 = {
-      x: lodash.random(500, 750),
-      y: lodash.random(20, 100),
+      x: lodash.random(0, 1920),
+      y: lodash.random(0, 1080),
     };
   for (var i = 0; i < 1; i += accuracy) {
     var p = beizerGenerator(i, p0, p1, p2, p3);
@@ -50,5 +50,7 @@ function genPoint() {
 
   return points;
 }
+
+console.log(genPoint());
 
 module.exports = genPoint;
