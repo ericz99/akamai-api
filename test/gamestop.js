@@ -17,7 +17,7 @@ async function createTest(amount) {
         console.log("DONE!");
       } else {
         // # gen cookie
-        const cookie = await new SensorGen({ isMact: false }).makeCookie(
+        const cookie = await new SensorGen({ isMact: true }).makeCookie(
           "gamestop"
         );
         // # add to cart
@@ -71,4 +71,4 @@ async function addToCart(productID, cookie) {
 }
 
 // # make test
-createTest(20);
+createTest(15);

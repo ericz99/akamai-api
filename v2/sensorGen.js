@@ -6,6 +6,7 @@ const got = require("got");
 const { CookieJar } = require("tough-cookie");
 const tunnel = require("tunnel");
 const UserAgent = require("user-agents");
+const { v4 } = require("uuid");
 
 const genBrowserData = require("../genBrowserData");
 const siteOptions = require("../stores.json");
@@ -18,6 +19,7 @@ class SensorGen {
     this.targetSite = null;
     this.proxy = proxy;
     this.isMact = isMact;
+    this.id = v4();
 
     if (!isMact) {
       // # starting timestamp for no mact
@@ -108,7 +110,9 @@ class SensorGen {
     // # get the selected site
     const selectedSite = siteOptions.find((s) => s[site] && s)[site];
     // # make a request to get invalid cookie
-    const result = await this.getCookie(selectedSite, usedUserAgent, cookieJar);
+    const cookie = await this.getCookie(selectedSite, usedUserAgent);
+    // # get post url
+    const postURL = await this.getPostScript(selectedSite, usedUserAgent);
     // # getting browser fingerprint data
     let n = this.gd(ua_browser, usedUserAgent, browserData);
     // # get site url
@@ -187,8 +191,8 @@ class SensorGen {
         this.get_cf_date(true) - this.bmak.start_ts,
         this.bmak.ta,
         this.bmak.n_ck,
-        result.cookie,
-        this.ab(result.cookie),
+        cookie,
+        this.ab(cookie),
         rVal,
         rCFP,
         browserData.fas,
@@ -249,10 +253,124 @@ class SensorGen {
       selectedSite,
       sensor_data: this.gen_key(this.bmak.sensor_data),
       usedUserAgent,
-      post_url: result.pUrl,
+      post_url: postURL,
       cookieJar,
     };
   }
+
+  // /**
+  //  *
+  //  * @param {*} site
+  //  * @return valid cookie
+  //  */
+  // async makeCookie(site) {
+  //   try {
+  //     // # gen sensor data
+  //     const {
+  //       selectedSite,
+  //       sensor_data,
+  //       usedUserAgent,
+  //       post_url,
+  //       cookieJar,
+  //     } = await this.makeSensor(site);
+
+  //     let params = {
+  //       method: "POST",
+  //       http2: true,
+  //       headers: {
+  //         accept: "*/*",
+  //         "accept-encoding": "gzip, deflate, br",
+  //         "accept-language": "en-US,en;q=0.9",
+  //         // cookie: `_abck=${abck};`,
+  //         origin: `https://www.${site}.com`,
+  //         referer: `https://www.${site}.com/`,
+  //         "sec-fetch-site": "same-origin",
+  //         "sec-fetch-dest": "empty",
+  //         "sec-fetch-mode": "cors",
+  //         "user-agent": usedUserAgent,
+  //       },
+  //       body: JSON.stringify({
+  //         sensor_data: sensor_data,
+  //       }),
+  //       responseType: "json",
+  //       decompress: true,
+  //       agent: !this.proxy
+  //         ? null
+  //         : {
+  //             https: tunnel.httpsOverHttp({
+  //               proxy: {
+  //                 host: "proxy.packetstream.io",
+  //                 port: "31112",
+  //                 proxyAuth: "ericz123:eb08eB4QEp2lprWE_country-UnitedStates",
+  //               },
+  //             }),
+  //           },
+  //       timeout: 10000,
+  //       cookieJar: cookieJar,
+  //     };
+
+  //     // # make request
+  //     const resp = await got(`${selectedSite.url}${post_url}`, params);
+  //     // # grab cookie
+  //     const cookie = resp.headers["set-cookie"]
+  //       .toString()
+  //       .split("_abck=")[1]
+  //       .split("; Domain")[0];
+
+  //     // # return back valid cookie
+  //     return cookie;
+  //   } catch (e) {
+  //     if (e) {
+  //       console.log("\x1b[31m", `[POST] ${e.message}`);
+  //     }
+  //   }
+  // }
+
+  // async getCookie(selectedSite, usedUserAgent, cookieJar) {
+  //   // # make request
+  //   const resp = await got(selectedSite.url, {
+  //     method: "GET",
+  //     http2: true,
+  //     headers: {
+  //       ...selectedSite.headers,
+  //       "user-agent": usedUserAgent,
+  //     },
+  //     agent: !this.proxy
+  //       ? null
+  //       : {
+  //           https: tunnel.httpsOverHttp({
+  //             proxy: {
+  //               host: "proxy.packetstream.io",
+  //               port: "31112",
+  //               proxyAuth: "ericz123:eb08eB4QEp2lprWE_country-UnitedStates",
+  //             },
+  //           }),
+  //         },
+  //     cookieJar: cookieJar,
+  //   });
+
+  //   let p = /src="\/(static|assets|api|resources|public)\/(\w+)/gm.exec(
+  //     resp.body
+  //   );
+
+  //   // # get abck cookie
+  //   let cookie = resp.headers["set-cookie"]
+  //     .toString()
+  //     .split("_abck=")[1]
+  //     .split("; Domain")[0];
+
+  //   // # get the bm_sz
+  //   let bm_sz = resp.headers["set-cookie"]
+  //     .toString()
+  //     .split("bm_sz=")[1]
+  //     .split("; Domain")[0];
+
+  //   return {
+  //     pUrl: `${p[1]}/${p[2]}`,
+  //     cookie,
+  //     bm_sz,
+  //   };
+  // }
 
   /**
    *
@@ -270,50 +388,39 @@ class SensorGen {
         cookieJar,
       } = await this.makeSensor(site);
 
-      let params = {
+      const resp = await got("http://localhost:3030/sensor", {
         method: "POST",
-        http2: true,
         headers: {
-          accept: "*/*",
-          "accept-encoding": "gzip, deflate, br",
-          "accept-language": "en-US,en;q=0.9",
-          // cookie: `_abck=${abck};`,
-          origin: `https://www.${site}.com`,
-          referer: `https://www.${site}.com/`,
-          "sec-fetch-site": "same-origin",
-          "sec-fetch-dest": "empty",
-          "sec-fetch-mode": "cors",
-          "user-agent": usedUserAgent,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          sensor_data: sensor_data,
+          id: this.id,
+          url: `${selectedSite.url}${post_url}`,
+          body: JSON.stringify({
+            sensor_data: sensor_data,
+          }),
+          headers: {
+            accept: "*/*",
+            "accept-encoding": "gzip, deflate, br",
+            "accept-language": "en-US,en;q=0.9",
+            // cookie: `_abck=${abck};`,
+            origin: `https://www.${site}.com`,
+            referer: `https://www.${site}.com/`,
+            "sec-fetch-site": "same-origin",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "user-agent": usedUserAgent,
+          },
         }),
         responseType: "json",
-        decompress: true,
-        agent: !this.proxy
-          ? null
-          : {
-              https: tunnel.httpsOverHttp({
-                proxy: {
-                  host: "proxy.packetstream.io",
-                  port: "31112",
-                  proxyAuth: "ericz123:eb08eB4QEp2lprWE_country-UnitedStates",
-                },
-              }),
-            },
-        timeout: 10000,
-        cookieJar: cookieJar,
-      };
+      });
 
-      // # make request
-      const resp = await got(`${selectedSite.url}${post_url}`, params);
-      // # grab cookie
-      const cookie = resp.headers["set-cookie"]
+      // # get abck cookie
+      let cookie = resp.body.cookies
         .toString()
         .split("_abck=")[1]
         .split("; Domain")[0];
 
-      // # return back valid cookie
       return cookie;
     } catch (e) {
       if (e) {
@@ -322,7 +429,13 @@ class SensorGen {
     }
   }
 
-  async getCookie(selectedSite, usedUserAgent, cookieJar) {
+  /**
+   *
+   * @param {*} selectedSite
+   * @param {*} usedUserAgent
+   * @description get post_url script
+   */
+  async getPostScript(selectedSite, usedUserAgent) {
     // # make request
     const resp = await got(selectedSite.url, {
       method: "GET",
@@ -342,30 +455,45 @@ class SensorGen {
               },
             }),
           },
-      cookieJar: cookieJar,
     });
 
     let p = /src="\/(static|assets|api|resources|public)\/(\w+)/gm.exec(
       resp.body
     );
 
+    return `${p[1]}/${p[2]}`;
+  }
+
+  /**
+   *
+   * @param {*} selectedSite
+   * @description get initial cookie
+   */
+  async getCookie(selectedSite, usedUserAgent) {
+    // # make request
+    const resp = await got("http://localhost:3030/initial", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: this.id,
+        url: selectedSite.url,
+        headers: {
+          ...selectedSite.headers,
+          "user-agent": usedUserAgent,
+          "Content-Type": "application/json",
+        },
+      }),
+    });
+
     // # get abck cookie
-    let cookie = resp.headers["set-cookie"]
-      .toString()
+    let cookie = JSON.parse(resp.body)
+      .cookies.toString()
       .split("_abck=")[1]
       .split("; Domain")[0];
 
-    // # get the bm_sz
-    let bm_sz = resp.headers["set-cookie"]
-      .toString()
-      .split("bm_sz=")[1]
-      .split("; Domain")[0];
-
-    return {
-      pUrl: `${p[1]}/${p[2]}`,
-      cookie,
-      bm_sz,
-    };
+    return cookie;
   }
 
   /**
@@ -983,7 +1111,7 @@ class SensorGen {
       y: lodash.random(0, browserData.window.screen.height),
     };
 
-    var loop_amount = lodash.random(70, 99); // set back to whatever lodash.random(60, 99) later
+    var loop_amount = lodash.random(49, 99); // set back to whatever lodash.random(60, 99) later
 
     timeStamp -= lodash.random(900, 1100);
     //# for the first string it0
