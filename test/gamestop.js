@@ -17,21 +17,22 @@ async function createTest(amount) {
         console.log("DONE!");
       } else {
         // # gen cookie
-        const cookie = await new SensorGen({ isMact: true }).makeCookie(
-          "gamestop"
-        );
+        const cookie = await new SensorGen({
+          isMact: false,
+          proxy: false,
+        }).makeCookie("gamestop");
         // # add to cart
-        await addToCart("134407", cookie);
+        await addToCart("134407", cookie, i);
         i++;
       }
     }),
-    1000
+    500
   );
 
   t();
 }
 
-async function addToCart(productID, cookie) {
+async function addToCart(productID, cookie, i) {
   try {
     const resp = await got(
       `https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Cart-AddProduct?redesignFlag=true&productID=${productID}`,
@@ -62,7 +63,7 @@ async function addToCart(productID, cookie) {
     );
 
     Logger.yellow(cookie);
-    Logger.green(`ATC STATUS: ${resp.statusCode}`);
+    Logger.green(`[${i}] ATC STATUS: ${resp.statusCode}`);
   } catch (e) {
     if (e) {
       Logger.red("INVALID COOKIE");
@@ -71,4 +72,4 @@ async function addToCart(productID, cookie) {
 }
 
 // # make test
-createTest(15);
+createTest(50);
