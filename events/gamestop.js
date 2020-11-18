@@ -114,6 +114,40 @@ function lvc(bmak, updatet) {
       // bmak.vc_cnt++;
     }
     bmak.vc_cnt++;
+    return bmak.vcact;
+  } catch (a) {}
+}
+
+function cka(bmak, updatet) {
+  let newMap = [];
+  let copy = [];
+  let rand = lodash.random(2, 6);
+  let keyMap = [1, 3, 2];
+
+  for (let i = 0; i < rand; i++) {
+    newMap = newMap.concat(keyMap);
+  }
+
+  let k = updatet - lodash.random(2000, 3000);
+  copy = [...newMap];
+
+  try {
+    for (let i = 0; i < copy.length; i++) {
+      bmak.ke_cnt++;
+      var t = newMap.shift();
+      k += lodash.random(100, 125); // improve timestamp, its off on every loop
+      var n = -2; // may change due to keyCode
+      var l = 0;
+      var d = 0;
+      var s = -1;
+
+      var u = i + "," + t + "," + k + "," + n + "," + l + "," + d + "," + s;
+
+      bmak.ke_vel += i + t + k + n + d + s;
+      bmak.kact += u + ";";
+    }
+
+    return bmak.kact;
   } catch (a) {}
 }
 
@@ -133,4 +167,5 @@ module.exports = {
   cdoa,
   cdma,
   lvc,
+  cka,
 };

@@ -54,3 +54,10 @@ and it gave me a real cookie.
 collect more browser data or just buy from ppl. buy at least 3000+, should be good enough
 
 improve our mact locally, and create an MACT api with math, no need to ML
+
+- new 
+
+what im thinking is that each day timestamp loading time is differ than others day
+for example morning less traffic, afternoon more traffic? maybe.
+
+timestamp dmact domact maybe causiung limit cap based of how maybe bad is it?

@@ -1,18 +1,16 @@
 const device = require("./device.json");
 
-const usedDevice = device[Math.floor(Math.random() * device.length)];
-
 /**
  * @description fetches the user agent
  */
-function getUserAgent() {
+function getUserAgent(usedDevice) {
   return usedDevice.navigator.userAgent;
 }
 
 /**
  * @description fetches user canvas value
  */
-function getCanvasValue() {
+function getCanvasValue(usedDevice) {
   return {
     rCFP: usedDevice.firstCanvas.primary,
     rVal: usedDevice.firstCanvas.rVal,
@@ -24,7 +22,7 @@ function getCanvasValue() {
 /**
  * @description fetches user screen size
  */
-function getScreenSize() {
+function getScreenSize(usedDevice) {
   const winScreenSize = usedDevice.window.screen;
   const docScreenSize = usedDevice.document.body;
   return {
@@ -41,14 +39,14 @@ function getScreenSize() {
 /**
  * @description get mr data
  */
-function getMr() {
+function getMr(usedDevice) {
   return usedDevice.performanceInfo;
 }
 
 /**
  * @description get ssh value
  */
-function ssh() {
+function ssh(usedDevice) {
   let ssh = "";
   const { speechSynthesis } = usedDevice.window;
 
@@ -68,7 +66,7 @@ function pluginInfo() {}
 /**
  * @description get the fas value
  */
-function fas() {
+function fas(usedDevice) {
   const { navigator, math } = usedDevice;
   try {
     return (
@@ -106,14 +104,14 @@ function fas() {
 /**
  * @description get fmh value
  */
-function fmh() {
+function fmh(usedDevice) {
   return ats(mn_s(usedDevice.otherFonts));
 }
 
 /**
  * @description get fmz value
  */
-function fmz() {
+function fmz(usedDevice) {
   return usedDevice.window.devicePixelRatio;
 }
 
@@ -328,20 +326,24 @@ function rotate_right(a, t) {
 /**
  * @returns return all browser data
  */
-function getAllBrowserData() {
+function getAllBrowserData(rand) {
+  const usedDevice = device[rand];
+
+  console.log(rand);
+
   return {
-    userAgent: getUserAgent(),
-    canvas: getCanvasValue(),
-    screenSize: getScreenSize(),
+    userAgent: getUserAgent(usedDevice),
+    canvas: getCanvasValue(usedDevice),
+    screenSize: getScreenSize(usedDevice),
     navigator: usedDevice.navigator,
     window: usedDevice.window,
     document: usedDevice.document,
     screen: usedDevice.screen,
-    mr: getMr(),
-    ssh: ssh(),
-    fas: fas(),
-    fmh: fmh(),
-    fmz: fmz(),
+    mr: getMr(usedDevice),
+    ssh: ssh(usedDevice),
+    fas: fas(usedDevice),
+    fmh: fmh(usedDevice),
+    fmz: fmz(usedDevice),
   };
 }
 

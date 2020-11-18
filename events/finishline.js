@@ -114,6 +114,7 @@ function lvc(bmak, updatet) {
       // bmak.vc_cnt++;
     }
     bmak.vc_cnt++;
+    return bmak.vcact;
   } catch (a) {}
 }
 

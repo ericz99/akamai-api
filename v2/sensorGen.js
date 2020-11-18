@@ -8,6 +8,7 @@ const tunnel = require("tunnel");
 const UserAgent = require("user-agents");
 const { v4 } = require("uuid");
 
+const device = require("../device.json");
 const genBrowserData = require("../genBrowserData");
 const siteOptions = require("../stores.json");
 const canvasArray = require("../canvas.json");
@@ -23,10 +24,10 @@ class SensorGen {
 
     if (!isMact) {
       // # starting timestamp for no mact
-      this.start_ts = this.get_cf_date(true) - lodash.random(300, 900);
+      this.start_ts = this.get_cf_date(true) - lodash.random(600, 900);
     } else {
       // # starting timestamp for mact
-      this.start_ts = this.get_cf_date(true) - lodash.random(7500, 10000);
+      this.start_ts = this.get_cf_date(true) - lodash.random(4500, 6000);
     }
 
     // # ALL BMAK DATA
@@ -88,6 +89,7 @@ class SensorGen {
       vc_cnt: 0,
       vcact: "",
       nav_perm: "11321144241322243122",
+      updatet: 0,
     };
   }
 
@@ -102,7 +104,8 @@ class SensorGen {
     // # create new cookie jar per sensor data
     const cookieJar = new CookieJar();
     // # get random browser data
-    const browserData = genBrowserData();
+    const randDevice = Math.floor(Math.random() * device.length);
+    const browserData = genBrowserData(randDevice);
     // # get random user-agent
     const usedUserAgent = browserData.userAgent.toString().replace(/\|"/g, "");
     // # get browser ua
@@ -134,7 +137,9 @@ class SensorGen {
     // # get dmact
     var dmact = events[site].cdma(this.bmak, this.updatet(), rand);
     // # get vcact only for certain site
-    // events[site].lvc(bmak, updatet(bmak));
+    // var vcact = events[site].lvc(this.bmak, this.updatet());
+    // # get kact - keyboard event
+    // var kact = events[site].cka(this.bmak, this.updatet());
     // # get the jrs(start_ts)
     const ss = this.jrs(this.bmak.start_ts);
     // # first sensor data string
@@ -149,7 +154,7 @@ class SensorGen {
       "-1,2,-94,-102," +
       selectedSite.informinfo +
       "-1,2,-94,-108," +
-      // bmak.kact
+      // kact +
       "-1,2,-94,-110," +
       (this.isMact ? this.genMouseData(browserData) : "") +
       "-1,2,-94,-117," +
@@ -161,7 +166,7 @@ class SensorGen {
       "-1,2,-94,-114," +
       // bmak.pact
       "-1,2,-94,-103," +
-      // bmak.vcact
+      // vcact +
       "-1,2,-94,-112," +
       b +
       "-1,2,-94,-115," +
@@ -178,7 +183,7 @@ class SensorGen {
           this.bmak.dme_vel +
           this.bmak.te_vel +
           this.bmak.pe_vel,
-        this.updatet(),
+        this.isMact ? this.bmak.updatet : this.updatet(),
         this.bmak.init_time,
         this.bmak.start_ts,
         this.updatetd(),
@@ -188,7 +193,7 @@ class SensorGen {
         this.pi(this.bmak.d2 / 6),
         this.bmak.pe_cnt,
         this.bmak.te_cnt,
-        this.get_cf_date(true) - this.bmak.start_ts,
+        this.isMact ? this.bmak.updatet + 1 : this.updatet(),
         this.bmak.ta,
         this.bmak.n_ck,
         cookie,
@@ -625,6 +630,7 @@ class SensorGen {
       this.bmak.tst +
       ";" +
       (this.get_cf_date() - j);
+    console.log(sensor_data);
     return sensor_data;
   }
 
@@ -873,7 +879,7 @@ class SensorGen {
 
     try {
       var a = 0;
-      a = Date.now ? Date.now() - lodash.random(30, 40) : +new Date() - 10;
+      a = Date.now ? Date.now() - lodash.random(10, 40) : +new Date() - 10;
       var n = 0;
       n = Date.now ? Date.now() : +new Date();
       td = n - a;
@@ -1092,7 +1098,7 @@ class SensorGen {
    */
   genMouseData(browserData) {
     var timeStamp = this.updatet();
-    var firstTimeStamp = lodash.random(100, 200);
+    // var firstTimeStamp = lodash.random(100, 200);
     var mouseString = "";
     let p0 = {
       x: lodash.random(0, browserData.window.screen.width),
@@ -1113,15 +1119,15 @@ class SensorGen {
 
     var loop_amount = lodash.random(49, 99); // set back to whatever lodash.random(60, 99) later
 
-    timeStamp -= lodash.random(900, 1100);
-    //# for the first string it0
-    mouseString += this.bmak.me_cnt + ",2," + firstTimeStamp + ",-1,-1,-1,it0;";
-    this.bmak.me_cnt += 1;
-    this.bmak.me_vel += this.bmak.me_cnt + 1 + firstTimeStamp - 2;
+    timeStamp -= lodash.random(1000, 1500);
+    // //# for the first string it0
+    // mouseString += this.bmak.me_cnt + ",2," + firstTimeStamp + ",-1,-1,-1,it0;";
+    // this.bmak.me_cnt += 1;
+    // this.bmak.me_vel += this.bmak.me_cnt + 1 + firstTimeStamp - 2;
 
-    for (var i = 1; i <= loop_amount; i++) {
+    for (var i = 0; i <= loop_amount; i++) {
       var p = this.bezier(i / 100, p0, p1, p2, p3);
-      timeStamp = timeStamp + lodash.random(10, 24);
+      timeStamp = timeStamp + lodash.random(10, 34);
       this.bmak.me_cnt += 1;
       if (i == loop_amount) {
         mouseString =
@@ -1151,6 +1157,9 @@ class SensorGen {
       }
       mouseString = mouseString;
     }
+
+    // # update the updatet
+    this.bmak.updatet = timeStamp;
 
     return mouseString;
   }
