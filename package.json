@@ -16,6 +16,7 @@
     "express": "^4.17.1",
     "got": "^11.8.0",
     "jsdom": "^16.4.0",
+    "keycode": "^2.2.0",
     "lodash": "^4.17.20",
     "mytls": "^1.0.5",
     "perf_hooks": "0.0.1",
@@ -24,8 +25,10 @@
     "puppeteer-extra-plugin-stealth": "^2.6.5",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
+    "rword": "^3.1.2",
     "tough-cookie": "^4.0.0",
     "tunnel": "0.0.6",
+    "txtgen": "^2.2.8",
     "user-agents": "^1.0.559",
     "uuid": "^8.3.1"
   }

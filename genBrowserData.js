@@ -329,8 +329,6 @@ function rotate_right(a, t) {
 function getAllBrowserData(rand) {
   const usedDevice = device[rand];
 
-  console.log(rand);
-
   return {
     userAgent: getUserAgent(usedDevice),
     canvas: getCanvasValue(usedDevice),

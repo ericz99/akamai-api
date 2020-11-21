@@ -1,4 +1,8 @@
 const lodash = require("lodash");
+const txt = require("txtgen");
+const { rword } = require("rword");
+
+const kactJSON = require("../kact.json");
 
 /**
  * since finishline site load slow,
@@ -118,35 +122,94 @@ function lvc(bmak, updatet) {
   } catch (a) {}
 }
 
+// function cka(bmak, updatet) {
+//   const rand = lodash.random(0, kactJSON.length - 1);
+//   const kactObj = kactJSON[rand];
+//   const split = kactObj.kact.split(";");
+//   // # update bmak
+//   bmak.kact += kactObj.kact;
+//   bmak.ke_cnt += kactObj.ke_cnt;
+//   bmak.ke_vel += kactObj.ke_vel;
+//   bmak.ta += kactObj.ta;
+//   // # get last updatet
+//   bmak.updatet = split[split.length - 2].split(",")[2];
+//   return bmak.kact;
+// }
+
 function cka(bmak, updatet) {
+  /**
+   * have a .txt file with bunch of sentence, and type based on taht
+   * that will full ignore randomizd, and will be unique
+   */
+  let randWords = rword.generate(lodash.random(5, 10), {
+    length: lodash.random(4, 8),
+    capitalize: "first",
+  });
+
   let newMap = [];
   let copy = [];
-  let rand = lodash.random(2, 6);
   let keyMap = [1, 3, 2];
 
-  for (let i = 0; i < rand; i++) {
-    newMap = newMap.concat(keyMap);
+  for (let i = 0; i < randWords.join(" ").length; i++) {
+    if (i == 0) {
+      newMap.push(1);
+    } else {
+      newMap.push(keyMap[lodash.random(0, keyMap.length - 1)]);
+    }
   }
 
-  let k = updatet - lodash.random(2000, 3000);
+  let k = updatet - lodash.random(1000, 2000);
   copy = [...newMap];
+
+  // # random length 1-10, but different index
+  let randomArr = Array.from(Array(lodash.random(2, 30))).map((x) =>
+    lodash.random(0, copy.length)
+  );
+
+  // # random shift code
+  let randomShiftCode = Array.from(Array(lodash.random(2, 30))).map((x) =>
+    lodash.random(0, copy.length)
+  );
+
+  // # random keycode for ctrl shift keys
+  let randomKeyCode = [16, 17, 18, 20];
+  let randomMetaCode = [8, 0];
+
+  // 1 - keyDown
+  // 2 - keyUp
+  // 3 - keyPress
 
   try {
     for (let i = 0; i < copy.length; i++) {
       bmak.ke_cnt++;
       var t = newMap.shift();
-      k += lodash.random(100, 125); // improve timestamp, its off on every loop
-      var n = -2; // may change due to keyCode
+      k += lodash.random(0, 125); // -> (1,20) // maybe delay longer in between words?
+      var n = randomArr.includes(i)
+        ? randomKeyCode[Math.floor(Math.random() * randomKeyCode.length)]
+        : -2; // may change due to keyCode
+
+      // # check if we at the last loop, need to add 13, because 13 = enter key
+      if (i == copy.length - 1) {
+        n = 13;
+      }
+
       var l = 0;
-      var d = 0;
-      var s = -1;
+      var d =
+        n != 16
+          ? randomShiftCode.includes(i)
+            ? 8
+            : 0
+          : randomMetaCode[Math.floor(Math.random() * randomMetaCode.length)];
+      var s = 113; // keycode element
 
       var u = i + "," + t + "," + k + "," + n + "," + l + "," + d + "," + s;
 
       bmak.ke_vel += i + t + k + n + d + s;
       bmak.kact += u + ";";
+      bmak.ta += k;
     }
 
+    bmak.updatet = k;
     return bmak.kact;
   } catch (a) {}
 }
