@@ -30,8 +30,8 @@ function getScreenSize(usedDevice) {
     height: winScreenSize.height,
     availWidth: winScreenSize.availWidth,
     availHeight: winScreenSize.availHeight,
-    clientWidth: docScreenSize.clientWidth,
-    clientHeight: docScreenSize.clientHeight,
+    clientWidth: usedDevice.window.innerWidth,
+    clientHeight: usedDevice.window.innerHeight,
     outerWidth: usedDevice.window.outerWidth,
   };
 }

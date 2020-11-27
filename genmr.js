@@ -80,7 +80,7 @@ function genMR() {
   let intv;
 
   intv = setInterval(() => {
-    if (i == 2000) {
+    if (i == 100) {
       console.log(harvested);
       clearInterval(intv);
       return;
@@ -88,5 +88,5 @@ function genMR() {
       harvested.push(getmr());
       i++;
     }
-  }, 250);
+  }, 2000);
 }

@@ -1,6 +1,7 @@
 const { CookieJar } = require("tough-cookie");
 const got = require("got");
 const request = require("request-promise");
+const setTitle = require("console-title");
 
 const SensorGen = require("../v2/sensorGen");
 const Logger = require("../libs/logger")("FINISHLINE");
@@ -8,21 +9,38 @@ const Logger = require("../libs/logger")("FINISHLINE");
 async function createTest(amount) {
   let harvested = [];
   let i = 0;
+  let successCount = 0;
+  let errorCount = 0;
   let intv = null;
   let t;
 
   intv = setInterval(
     (t = async () => {
       if (i == amount) {
+        const rate = successCount / i;
         clearInterval(intv);
         console.log("DONE!");
+        Logger.green(`[${successCount}/${i}] - SUCCESS RATE: ${rate}`);
       } else {
         // # gen cookie
-        const cookie = await new SensorGen({ isMact: true }).makeCookie(
+        const cookie = await new SensorGen({ isKact: true }).makeCookie(
           "finishline"
         );
+
+        if (cookie.length > 500 || cookie.length == 529) {
+          Logger.green(`[${i}] [${cookie.length}] COOKIE VALID: ${cookie}`);
+          successCount++;
+        } else {
+          Logger.red(`[${i}] [${cookie.length}] INVALID COOKIE: ${cookie}`);
+          errorCount++;
+        }
+
+        setTitle(
+          `Sensor Generator | Generated: ${successCount} | Error: ${errorCount}`
+        );
+
         // # add to cart
-        await addToCart(cookie, i);
+        // await addToCart(cookie, i);
         i++;
       }
     }),
@@ -135,3 +153,14 @@ async function _makeRequest(options) {
 }
 
 createTest(1000);
+
+// // # add to cart
+// addToCart(
+//   "1733BA45E48FFBE48168296522270DC3~-1~YAAQFYPXF5FU1vp1AQAAp/3i+wRCea7z+arwpl4355jnKQS4WLe2zm7CwVTp49ZcDeuedD7cfkJ7OoJJgHOtfizu5xNesmI9nlzIVhZCOGo2QFzOHw03hgdDlS6wd0/oxnv/SWqDrgK6DIcQYiZEZ8ip7SpJB57pF6c7g80Muh8vxK6csOt22+TM7LGgtRwXEzedeFLCmgloXOZP+Dvhww0TCsYKcKWjQUZ4Neee/u/HC5rj1iKa/0wny9Zoqgp3jL/2zvJ8hGmHOSCql2G21yERt8x71wy1w/IOO8iKjtjPPI24EHIyA7C1w7CE1L6L/yU9dULXLKqzKseBK0JSkdnb8SfapEJXD0Irm1ECDfw1uJzOxyU5otoZJFOapgkdqoLXICdR5nlFXXJfKWayI9rBnxdXYHoirB7bc7QbkXkxOS1uU8iYPZ9KOMxCGsTl1/vs6vtN5EWGK3aD8cR65K+pHfwJEZU=~-1~-1~-1",
+//   0
+// );
+
+// [458/500] - SUCCESS RATE: 0.916 eventless
+// [472/500] - SUCCESS RATE: 0.944 eventless
+// [566/600] - SUCCESS RATE: 0.9433333333333334 eventless
+// [799/800] - SUCCESS RATE: 0.99875 - with new device

@@ -1,4 +1,9 @@
 const lodash = require("lodash");
+const txt = require("txtgen");
+const { titleCase } = require("title-case");
+const randomWords = require("random-words");
+
+const studlyCap = require("../libs/studlyCap");
 
 /**
  * since finishline site load slow,
@@ -119,35 +124,267 @@ function lvc(bmak, updatet) {
 }
 
 function cka(bmak, updatet) {
-  let newMap = [];
-  let copy = [];
-  let rand = lodash.random(3, 6);
-  let keyMap = [1, 3, 2];
+  /**
+   * have a .txt file with bunch of sentence, and type based on taht
+   * that will full ignore randomizd, and will be unique
+   */
 
-  for (let i = 0; i < rand; i++) {
-    newMap = newMap.concat(keyMap);
-  }
+  let k = updatet;
 
-  let k = updatet - lodash.random(2000, 3000);
-  copy = [...newMap];
+  // 1 - keyDown
+  // 2 - keyUp
+  // 3 - keyPress
+
+  // keydown == keypress, its basically the same thing
+  // but, keydown will always be first then keypress
+  // if theres a captial, then two 1's then a 3, because that keydown
+
+  let str = studlyCap(randomWords({ exactly: lodash.random(3, 6), join: "" }));
+  let defaultLen = 140;
+  let randLongPress = lodash.random(0, str.length);
+  let arr = Array.from(Array(str.length).keys());
+
+  let randCtrlIndex = Array.from(Array(lodash.random(6, 9))).map((x) => {
+    let rand = lodash.random(0, arr.length - 1);
+    return arr.splice(rand, 1)[0];
+  });
+
+  let randShiftIndex = Array.from(Array(lodash.random(6, 9))).map((x) => {
+    let rand = lodash.random(0, arr.length - 1);
+    return arr.splice(rand, 1)[0];
+  });
+
+  let randAltIndex = Array.from(Array(lodash.random(6, 9))).map((x) => {
+    let rand = lodash.random(0, arr.length - 1);
+    return arr.splice(rand, 1)[0];
+  });
+
+  let j = 0;
+  let randEnding = 113;
+  let keyMap = [
+    {
+      n: 17,
+      d: 4,
+    },
+    {
+      n: 16,
+      d: 8,
+    },
+    {
+      n: 18,
+      d: 1,
+    },
+    {
+      n: 8,
+      d: 0,
+    },
+    {
+      n: -2,
+      d: 0,
+    },
+  ];
+
+  // it can't be the timestamp problem
+  // mostly likely the pattern are too similar
+  // TODO: find a way to make the pattern less detectable
+  // ex: if we have uppercase, it will do that same pattern over and over again
 
   try {
-    for (let i = 0; i < copy.length; i++) {
-      bmak.ke_cnt++;
-      var t = newMap.shift();
-      k += lodash.random(0, 25); // improve timestamp, its off on every loop
-      var n = -2; // may change due to keyCode
-      var l = 0;
-      var d = 0;
-      var s = -1;
+    for (let i = 0, j = 0; i < str.length; i++) {
+      if (j < defaultLen) {
+        let tri = "";
+        const letter = str[i];
 
-      var u = i + "," + t + "," + k + "," + n + "," + l + "," + d + "," + s;
+        // # random long click
+        if (i == randLongPress) {
+          for (let z = 0; z < lodash.random(6, 12); z++) {
+            if (z == 1) {
+              k += lodash.random(200, 400);
+              bmak.ke_vel += j + 1 + k + 16 + 8 + randEnding;
+              tri += `${j++},${1},${k},${16},${0},${8},${randEnding};`;
+              bmak.ta += k;
+              bmak.ke_cnt++;
+            } else {
+              // # ctrl key - keyDown
+              k += lodash.random(1, 120);
+              bmak.ke_vel += j + 1 + k + 16 + 8 + randEnding;
+              tri += `${j++},${1},${k},${16},${0},${8},${randEnding};`;
+              bmak.ta += k;
+              bmak.ke_cnt++;
+            }
+          }
 
-      bmak.ke_vel += i + t + k + n + d + s;
-      bmak.kact += u + ";";
+          // # this will be the keyUp
+          k += lodash.random(10, 15);
+          bmak.ke_vel += j + 2 + k + 16 + 0 + randEnding;
+          tri += `${j++},${2},${k},${16},${0},${0},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+        }
+
+        // # this primary for ctrl keys
+        if (randCtrlIndex.includes(i) && i !== randLongPress) {
+          // # ctrl key - keyDown
+          k += lodash.random(1, 75);
+          bmak.ke_vel += j + 1 + k + 17 + 4 + randEnding;
+          tri += `${j++},${1},${k},${17},${0},${4},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+          // # ctrl key - keyUp
+          k += lodash.random(150, 250);
+          bmak.ke_vel += j + 2 + k + 17 + 0 + randEnding;
+          tri += `${j++},${2},${k},${17},${0},${0},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+        }
+
+        // # this primary for shift keys
+        if (randShiftIndex.includes(i) && i !== randLongPress) {
+          // # ctrl key - keyDown
+          k += lodash.random(1, 75);
+          bmak.ke_vel += j + 1 + k + 16 + 8 + randEnding;
+          tri += `${j++},${1},${k},${16},${0},${8},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+          // # ctrl key - keyUp
+          k += lodash.random(150, 250);
+          bmak.ke_vel += j + 2 + k + 16 + 0 + randEnding;
+          tri += `${j++},${2},${k},${16},${0},${0},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+        }
+
+        // # this primary for alt keys
+        if (randAltIndex.includes(i) && i !== randLongPress) {
+          // # ctrl key - keyDown
+          k += lodash.random(1, 75);
+          bmak.ke_vel += j + 1 + k + 18 + 1 + randEnding;
+          tri += `${j++},${1},${k},${18},${0},${1},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+          // # ctrl key - keyUp
+          k += lodash.random(80, 150);
+          bmak.ke_vel += j + 2 + k + 18 + 0 + randEnding;
+          tri += `${j++},${2},${k},${18},${0},${0},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+        }
+
+        // // # if its a capital letter - we shift 16 and it should be - type of keyDown
+        if (letter == letter.toUpperCase()) {
+          // # keyDown first
+          k += lodash.random(100, 150);
+          bmak.ke_vel += j + 1 + k + 16 + 8 + randEnding;
+          tri += `${j++},${1},${k},${16},${0},${8},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+          // # another KeyDown
+          k += lodash.random(100, 150);
+          bmak.ke_vel += j + 1 + k + -2 + 8 + randEnding;
+          tri += `${j++},${1},${k},${-2},${0},${8},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+          // # keyPress
+          bmak.ke_vel += j + 3 + k + -2 + 8 + randEnding;
+          tri += `${j++},${3},${k},${-2},${0},${8},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+          // # after it keyPress, we need to find what it keyPress, so its shift
+          k += lodash.random(75, 125);
+          bmak.ke_vel += j + 2 + k + -2 + 8 + randEnding;
+          tri += `${j++},${2},${k},${-2},${0},${8},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+          // # we click twice, so we need another keyDown
+          k += lodash.random(75, 125);
+          bmak.ke_vel += j + 2 + k + 16 + 0 + randEnding;
+          tri += `${j++},${2},${k},${16},${0},${0},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+          // # might need another click keyUp
+          k += lodash.random(25, 75);
+          bmak.ke_vel += j + 2 + k + -2 + 0 + randEnding;
+          tri += `${j++},${2},${k},${-2},${0},${0},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+        } else {
+          // # keyDown first
+          k += lodash.random(50, 100);
+          bmak.ke_vel += j + 1 + k + -2 + 0 + randEnding;
+          tri += `${j++},${1},${k},${-2},${0},${0},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+          // # keyPress
+          bmak.ke_vel += j + 3 + k + -2 + 0 + randEnding;
+          tri += `${j++},${3},${k},${-2},${0},${0},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+          // # we click twice, so we need another keyDown
+          k += lodash.random(25, 75);
+          bmak.ke_vel += j + 2 + k + -2 + 0 + randEnding;
+          tri += `${j++},${2},${k},${-2},${0},${0},${randEnding};`;
+          bmak.ta += k;
+          bmak.ke_cnt++;
+        }
+
+        // # concat our kact
+        bmak.kact += tri;
+      } else {
+        // # get a random keyMap
+        let randKeyMap = keyMap[Math.floor(Math.random() * keyMap.length)];
+        k += lodash.random(150, 300);
+        bmak.ke_vel += j + 1 + k + randKeyMap.n + randKeyMap.d + randEnding;
+        bmak.kact += `${j++},${1},${k},${randKeyMap.n},${0},${
+          randKeyMap.d
+        },${randEnding};`;
+        bmak.ta += k;
+        bmak.ke_cnt++;
+        // # keyDown for keyMap
+        k += lodash.random(25, 75);
+        bmak.ke_vel += j + 2 + k + randKeyMap.n + 0 + randEnding;
+        bmak.kact += `${j++},${2},${k},${
+          randKeyMap.n
+        },${0},${0},${randEnding};`;
+        bmak.ta += k;
+        bmak.ke_cnt++;
+        // # just update the last one
+        k += lodash.random(200, 600);
+        bmak.ke_vel += j + 1 + k + 13 + 0 + randEnding;
+        bmak.kact += `${j},${1},${k},${13},${0},${0},${randEnding};`;
+        bmak.ta += k;
+        bmak.ke_cnt++;
+        break;
+      }
+
+      if (i == str.length - 1) {
+        // # get a random keyMap
+        let randKeyMap = keyMap[Math.floor(Math.random() * keyMap.length)];
+        k += lodash.random(150, 300);
+        bmak.ke_vel += j + 1 + k + randKeyMap.n + randKeyMap.d + randEnding;
+        bmak.kact += `${j++},${1},${k},${randKeyMap.n},${0},${
+          randKeyMap.d
+        },${randEnding};`;
+        bmak.ta += k;
+        bmak.ke_cnt++;
+        // # keyDown for keyMap
+        k += lodash.random(25, 75);
+        bmak.ke_vel += j + 2 + k + randKeyMap.n + 0 + randEnding;
+        bmak.kact += `${j++},${2},${k},${
+          randKeyMap.n
+        },${0},${0},${randEnding};`;
+        bmak.ta += k;
+        bmak.ke_cnt++;
+        // # just update the last one
+        k += lodash.random(1, 500);
+        bmak.ke_vel += j + 1 + k + 13 + 0 + randEnding;
+        bmak.kact += `${j},${1},${k},${13},${0},${0},${randEnding};`;
+        bmak.ta += k;
+        bmak.ke_cnt++;
+        break;
+      }
     }
 
-    // bmak.updatet = k;
+    bmak.updatet = k;
     return bmak.kact;
   } catch (a) {}
 }

@@ -26,7 +26,7 @@ class NewSensorGen {
 
     if (!isMact) {
       // # starting timestamp for no mact
-      this.start_ts = this.get_cf_date(true) - lodash.random(600, 900);
+      this.start_ts = this.get_cf_date(true) - lodash.random(300, 600);
     } else {
       // # starting timestamp for mact
       this.start_ts = this.get_cf_date(true) - lodash.random(4500, 6000);
@@ -74,8 +74,8 @@ class NewSensorGen {
       te_cnt: 0,
       api_public_key: "afSbep8yjnZUjq3aL010jO15Sawj2VZfdYK8uY90uxq",
       cs: "0a46G5m17Vrp4o4c",
-      aj_indx: 2, // same thing
-      aj_type: 1, // event type depend on certain event
+      aj_indx: !isKact && !isMact ? 2 : 3, // same thing
+      aj_type: !isKact && !isMact ? 9 : 3, // event type depend on certain event
       mr: "-1",
       o9: 0,
       fmh: "", // probably different from every browser && screen size,
@@ -135,17 +135,23 @@ class NewSensorGen {
     // # update tst
     this.bmak.tst =
       this.get_cf_date() - (this.get_cf_date() - lodash.random(3, 9));
-    let rand = lodash.random(750, 1000);
+    let rand = lodash.random(300, 600);
     // # get doact
     var doact = events[site].cdoa(this.bmak, this.updatet(), rand);
     // # get dmact
     var dmact = events[site].cdma(this.bmak, this.updatet(), rand);
     // # get vcact only for certain site
-    // var vcact = events[site].lvc(this.bmak, this.updatet());
+    var vcact = events[site].lvc(this.bmak, this.updatet());
     // # get kact - keyboard event
-    var kact = events[site].cka(this.bmak, this.updatet());
+    var kact = this.isKact
+      ? events[site].cka(this.bmak, this.updatet())
+      : (this.bmak.updatet = this.updatet());
+
     // # get the jrs(start_ts)
     const ss = this.jrs(this.bmak.start_ts);
+
+    console.log(this.bmak.updatet);
+
     // # first sensor data string
     this.bmak.sensor_data =
       this.bmak.ver +
@@ -170,7 +176,7 @@ class NewSensorGen {
       "-1,2,-94,-114," +
       // bmak.pact
       "-1,2,-94,-103," +
-      // vcact +
+      vcact +
       "-1,2,-94,-112," +
       b +
       "-1,2,-94,-115," +
@@ -197,7 +203,7 @@ class NewSensorGen {
         this.pi(this.bmak.d2 / 6),
         this.bmak.pe_cnt,
         this.bmak.te_cnt,
-        this.bmak.updatet + 1,
+        this.bmak.updatet + lodash.random(1, 6),
         this.bmak.ta,
         this.bmak.n_ck,
         cookie,
@@ -557,7 +563,7 @@ class NewSensorGen {
       this.bmak.tst +
       ";" +
       (this.get_cf_date() - j);
-    // console.log(sensor_data);
+    console.log(sensor_data);
     return sensor_data;
   }
 

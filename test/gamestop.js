@@ -1,5 +1,6 @@
 const { CookieJar } = require("tough-cookie");
 const got = require("got");
+const setTitle = require("console-title");
 
 const SensorGen = require("../v2/sensorGen");
 const Logger = require("../libs/logger")("GAMESTOP");
@@ -8,6 +9,7 @@ async function createTest(amount) {
   let harvested = [];
   let i = 0;
   let successCount = 0;
+  let errorCount = 0;
   let intv = null;
   let t;
 
@@ -31,7 +33,12 @@ async function createTest(amount) {
           successCount++;
         } else {
           Logger.red(`[${i}] [${cookie.length}] INVALID COOKIE: ${cookie}`);
+          errorCount++;
         }
+
+        // setTitle(
+        //   `Sensor Generator | Generated: ${successCount} | Error: ${errorCount}`
+        // );
 
         // // # add to cart
         // await addToCart("136307", cookie, i);
@@ -86,7 +93,7 @@ async function addToCart(productID, cookie, i) {
 // // # add to cart
 // addToCart(
 //   "134407",
-//   "176D7B9D56913770D94D1C113F2D05A5~-1~YAAQTgEkF2bkBd51AQAA5BkT5gRaM/ptE2y6HddYNNE2L+yL1eKMlrM47BsdQphxkvRYt6GnFN6T57q3Mf5brr4YHdMBPjtNFA23TAVrRSSA3DMAKD15lmJMkjnpNwqfoOjjNY1hZIRrnHe1n5+5IGkJ/pra71lz4Xa3eLP6LpAPl5Tw/E1mWeJtk9PhhYhSeLaHthMPG4YRFcBmBkq8dBcQP1dd/Lxp0QNww0ZnaMkWaSBzGCtnyExcK61uNZcyg1etnFBP+wYRfqKefE0YJPyRUylhaKF/3KAR54RIxn4rOj9OA14FIBxR7qR4r+BYxtZ7wZHec/bGnxhOxTRKF/AHA+OybUNONbmRUvaMPoIxaIxJSA==~-1~-1~-1",
+//   "D216C07683A4DAA590A4A68716E5E896~-1~YAAQTgEkFys1Id51AQAA+FFu8QQf7Sq8K0l8z1bsas1yUjvTifMTe+49wd4coR0UHUAJ69bSAa0V+OsDV6nJNyfQOh3Y5HaEkMytV3LsxZVAZg7AzWqGTjO+uALsZoxsgtGfIBM6IeIWXaCFMo5k+wRUslWXGlKPzjdtE952eLj/VsA4/DhJhg9FDFUjLNGXhNK19pfV2bC6oTsQ/HH4tJhTZDoxjl+kGh9myBNTmBIGR0nwj2ySErzqaxcQKpsR7xKym3OH3Sn3546GzzAZrftfc0hC4uzvUXJg09CjdkB/zCIDhRvSI9sTFQXx18w3SHU+2bALVH1UzOojCcQMjXmcRtaSbeiKq6erUDSCx05ZWJl/Fg==~-1~-1~-1",
 //   0
 // );
 
@@ -97,3 +104,7 @@ createTest(1000);
 // 280/1000 - 28% - k = 1000, 1500, 1,15
 // 289/300 - 96% - NEWDEVICE.json
 // 300/300 - 100% success rate - olddevice.json
+
+// 456/500 - 91% - new device and new kact algo
+// 500/500 - 100% - old device and new kact algo :)
+// [2020-11-25T19:08:18.614Z] [881/1000] - SUCCESS RATE: 0.881 - kact event + new device
