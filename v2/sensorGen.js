@@ -23,12 +23,12 @@ class SensorGen {
     this.isKact = isKact;
     this.id = v4();
 
-    if (!isMact) {
+    if (!isMact || !isKact) {
       // # starting timestamp for no mact
-      this.start_ts = this.get_cf_date(true) - lodash.random(600, 900);
+      this.start_ts = this.get_cf_date(true) - lodash.random(900, 1000);
     } else {
       // # starting timestamp for mact
-      this.start_ts = this.get_cf_date(true) - lodash.random(300, 600);
+      this.start_ts = this.get_cf_date(true) - lodash.random(3000, 4000);
     }
 
     // # ALL BMAK DATA
@@ -134,7 +134,7 @@ class SensorGen {
       this.get_cf_date() - (this.get_cf_date() - lodash.random(3, 9));
     let rand =
       !this.isKact && !this.isMact
-        ? lodash.random(750, 1000)
+        ? lodash.random(650, 850)
         : lodash.random(1000, 1200);
 
     // # get doact

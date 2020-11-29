@@ -24,7 +24,7 @@ async function createTest(amount) {
         // # gen cookie
         const cookie = await new SensorGen({
           isMact: false,
-          isKact: true,
+          isKact: false,
           proxy: false,
         }).makeCookie("gamestop");
 
@@ -45,7 +45,7 @@ async function createTest(amount) {
         i++;
       }
     }),
-    350
+    500
   );
 
   t();
@@ -98,7 +98,7 @@ async function addToCart(productID, cookie, i) {
 // );
 
 // # make test
-createTest(1000);
+createTest(300);
 
 // 450/500 - 90% - k = 1000, 1500, 1,20
 // 280/1000 - 28% - k = 1000, 1500, 1,15
